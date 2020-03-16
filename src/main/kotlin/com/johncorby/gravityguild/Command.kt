@@ -34,11 +34,28 @@ object Command : BaseCommand() {
         help.showHelp()
     }
 
-    @Subcommand("reload")
+    @Subcommand("reload|r")
     @CommandPermission(ADMIN_PERM)
     @Description("reloads plugin (for debugging)")
     fun reload(player: Player) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload ${PLUGIN.name}")
         player.sendMessage("$MSG_PREFIX it is done")
+    }
+
+    @Subcommand("arena add|a")
+    @CommandPermission(ADMIN_PERM)
+    @Description("adds an arena by name")
+    @Syntax("<name>")
+    fun addArena(player: Player, name: String) {
+        TODO()
+    }
+
+    @Subcommand("arena delete|d")
+    @CommandPermission(ADMIN_PERM)
+    @CommandCompletion("@arena") //todo
+    @Description("removes an arena by name")
+    @Syntax("<name>")
+    fun delArena(player: Player, name: String) {
+        TODO()
     }
 }
