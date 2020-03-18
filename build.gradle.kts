@@ -7,7 +7,8 @@ plugins {
 }
 
 repositories {
-    maven("http://ci.athion.net/job/FastAsyncWorldEdit/ws/mvn/")
+//    maven("http://maven.playpro.com/")
+    maven("http://maven.enginehub.org/repo/")
 }
 
 dependencies {
@@ -16,10 +17,18 @@ dependencies {
     compileOnly("com.destroystokyo.paper:paper-api:+")
     implementation("co.aikar:acf-paper:+")
 
-    compileOnly("com.boydti:fawe-api:+")
+//    compileOnly("net.coreprotect:coreprotect:+")
+    // todo fawe
+//    compileOnly("com.sk89q.worldedit:worldedit-bukkit:+")
 }
 
 tasks {
+    defaultTasks("shadowJar")
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
+    }
+
     task<ConfigureShadowRelocation>("relocate") {
         target = shadowJar.get()
         prefix = project.group.toString()
