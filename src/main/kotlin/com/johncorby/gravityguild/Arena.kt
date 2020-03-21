@@ -1,193 +1,99 @@
 package com.johncorby.gravityguild
 
-import org.bukkit.block.Block
+import org.bukkit.Location
 import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.entity.*
-import org.bukkit.event.player.PlayerPickupItemEvent
-import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.inventory.ItemStack
-import org.mineacademy.gameapi.*
-import org.mineacademy.gameapi.Arena
-import org.mineacademy.gameapi.cause.DeathCause
-import org.mineacademy.gameapi.cause.JoinCause
-import org.mineacademy.gameapi.cause.LeaveCause
-import org.mineacademy.gameapi.cause.StopCause
-import org.mineacademy.gameapi.type.ArenaState
 
-class Arena : Arena {
-    override fun kickPlayer(player: Player?, cause: LeaveCause?): Boolean {
+/**
+ * return [Arena] that [Entity] is in
+ */
+val Entity.arenaIn: Arena?
+    get() {
+        for (arena in arenas.values)
+            if (arena.bounds.`in`(location))
+                return arena
+        return null
+    }
+
+/**
+ * defines area that [Arena] is in
+ */
+data class Bounds(val x1: Int, val z1: Int, val x2: Int, val z2: Int) {
+    fun `in`(l: Location): Boolean = l.world.name == ARENA_WORLD && l.blockX in x1..x2 && l.blockZ in z1..z2
+}
+
+private const val ARENA_WORLD = "gg_arenas"
+internal val arenas = mutableMapOf<String, Arena>()
+
+class Arena(val name: String, var bounds: Bounds) {
+    val entities = mutableListOf<Entity>()
+    val players = mutableListOf<Player>()
+
+    init {
+        arenas[name] = this
+    }
+
+    fun remove() {
+        arenas.remove(name)
+    }
+
+    fun close() {
+        entities.forEach { it.remove() }
+        entities.clear()
+
+        loadSchematic()
+    }
+
+    fun Player.joinArena() {
         TODO()
     }
 
-    override fun getSetup(): Setup {
+    fun Player.leaveArena() {
         TODO()
     }
 
-    override fun onEntityTarget(event: EntityTargetEvent?) {
+    /**
+     * load schematic to arena
+     */
+    private fun loadSchematic() {
         TODO()
+//        TaskManager.IMP.async {
+//            val file = File(PLUGIN.dataFolder, "$name.schematic")
+//        }
     }
 
-    override fun getPlugin(): ArenaPlugin {
+    /**
+     * save arena to schematic
+     */
+    private fun saveSchematic() {
         TODO()
-    }
+//        val region = CuboidRegion(
+//            Vector(bounds.x1, 0, bounds.z1),
+//            Vector(bounds.x2, 255, bounds.z2)
+//        )
+//        val copyWorld = EditSessionBuilder("world").autoQueue(false).build() // See https://github.com/boy0001/FastAsyncWorldedit/wiki/WorldEdit-EditSession
+//
+//        val pasteWorld = EditSessionBuilder("neworld").build() // See https://github.com/boy0001/FastAsyncWorldedit/wiki/WorldEdit-EditSession
+//
+//        val pos1 = Vector(10, 3, 10)
+//        val pos2 = Vector(50, 90, 50)
+//        val copyRegion = CuboidRegion(pos1, pos2)
+//
+//        val lazyCopy = copyWorld.lazyCopy(copyRegion)
+//
+//        val schem = Schematic(lazyCopy)
+//        val pasteAir = true
+//        val to = Vector(30, 10, 30)
+//        schem.paste(pasteWorld, to, pasteAir)
+//        pasteWorld.flushQueue()
 
-    override fun getSettings(): ArenaSettings {
-        TODO()
-    }
-
-    override fun onPostLoad() {
-        TODO()
-    }
-
-    override fun onPlayerBlockPlace(event: BlockPlaceEvent?) {
-        TODO()
-    }
-
-    override fun stopArena(cause: StopCause?) {
-        TODO()
-    }
-
-    override fun getName(): String {
-        TODO()
-    }
-
-    override fun getPhase(): ArenaPhase {
-        TODO()
-    }
-
-    override fun onPlayerDeath(player: Player?, killer: Player?) {
-        TODO()
-    }
-
-    override fun onPlayerDeath(player: Player?, cause: DeathCause?) {
-        TODO()
-    }
-
-    override fun getSnapshot(): ArenaSnapshot {
-        TODO()
-    }
-
-    override fun onPlayerClick(player: Player?, clickedBlock: Block?, hand: ItemStack?) {
-        TODO()
-    }
-
-    override fun isStopping(): Boolean {
-        TODO()
-    }
-
-    override fun onPlayerPickupTag(event: PlayerPickupItemEvent?, expItem: ExpItem?) {
-        TODO()
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        TODO()
-    }
-
-    override fun onPlayerClickAir(player: Player?, hand: ItemStack?) {
-        TODO()
-    }
-
-    override fun onProjectileLaunch(event: ProjectileLaunchEvent?) {
-        TODO()
-    }
-
-    override fun getPlayers(): MutableCollection<Player> {
-        TODO()
-    }
-
-    override fun onEntityDeath(event: EntityDeathEvent?) {
-        TODO()
-    }
-
-    override fun teleportPlayerBack(player: Player?) {
-        TODO()
-    }
-
-    override fun onPlayerRespawn(event: PlayerRespawnEvent?) {
-        TODO()
-    }
-
-    override fun onProjectileHit(event: ProjectileHitEvent?) {
-        TODO()
-    }
-
-    override fun joinPlayer(player: Player?, cause: JoinCause?): Boolean {
-        TODO()
-    }
-
-    override fun getState(): ArenaState {
-        TODO()
-    }
-
-    override fun onPlayerBlockDamage(event: EntityDamageByBlockEvent?, player: Player?, damage: Double) {
-        TODO()
-    }
-
-    override fun onPlayerDamage(event: EntityDamageByEntityEvent?, player: Player?, source: Entity?, damage: Double) {
-        TODO()
-    }
-
-    override fun onPlayerPvE(damager: Player?, victim: LivingEntity?, damage: Double) {
-        TODO()
-    }
-
-    override fun isJoined(player: Player?): Boolean {
-        TODO()
-    }
-
-    override fun isJoined(playerName: String?): Boolean {
-        TODO()
-    }
-
-    override fun startLobby() {
-        TODO()
-    }
-
-    override fun getRemainingSeconds(): Int {
-        TODO()
-    }
-
-    override fun getData(): ArenaData {
-        TODO()
-    }
-
-    override fun onEntitySpawn(event: EntitySpawnEvent?) {
-        TODO()
-    }
-
-    override fun getAliveMonsters(): Int {
-        TODO()
-    }
-
-    override fun startArena(): Boolean {
-        TODO()
-    }
-
-    override fun isEnabled(): Boolean {
-        TODO()
-    }
-
-    override fun onPlayerPvP(event: EntityDamageByEntityEvent?, damager: Player?, victim: Player?, damage: Double) {
-        TODO()
-    }
-
-    override fun getMessenger(): ArenaMessenger {
-        TODO()
-    }
-
-    override fun onPlayerBlockBreak(event: BlockBreakEvent?) {
-        TODO()
-    }
-
-    override fun onSnapshotUpdate(newState: ArenaSnapshotStage?) {
-        TODO()
-    }
-
-    override fun setRestoreSnapshots(restoreSnapshots: Boolean) {
-        TODO()
+//        TaskManager.IMP.async {
+//            val region = CuboidRegion(
+//                    Vector(bounds.x1, 0, bounds.z1),
+//                    Vector(bounds.x2, 255, bounds.z2)
+//            )
+//            val clipboard = BlockArrayClipboard()
+//            val schem = Schematic(region)
+//        }
     }
 }
