@@ -21,14 +21,16 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena tab completion
-            commandCompletions.registerCompletion("arena") { c -> arenas.keys.filter { it.startsWith(c.input) } }
+            commandCompletions.registerCompletion("arena") { c -> PLUGIN.arenas.available.filter { it.startsWith(c.input) } }
 
             // error handler
             setDefaultExceptionHandler { _, _, sender, _, t ->
                 sender.getIssuer<CommandSender>().error("we made a fucky wucky!!! (check console for exception :3)")
+
                 val writer = StringWriter()
                 val stream = PrintWriter(writer)
                 t.printStackTrace(stream)
+
                 Bukkit.getConsoleSender().error(writer.toString())
                 true
             }
@@ -37,7 +39,6 @@ object Command : BaseCommand() {
 
     @HelpCommand
     fun help(player: Player, help: CommandHelp) {
-        // todo maybe refactor to a messaging system?
         player.info("--- help ---")
         help.showHelp()
     }
