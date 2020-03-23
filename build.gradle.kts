@@ -19,7 +19,7 @@ dependencies {
     compileOnly("com.destroystokyo.paper:paper-api:+")
 
     implementation("co.aikar:acf-paper:+")
-    implementation("com.github.hazae41:mc-kutils:+")
+//    implementation("com.github.hazae41:mc-kutils:+")
 
 //    compileOnly("net.coreprotect:coreprotect:+")
 //    compileOnly("com.sk89q.worldedit:worldedit-bukkit:+")
