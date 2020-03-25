@@ -1,0 +1,9 @@
+repositories {
+    maven { url 'https://repo.aikar.co/content/groups/aikar/' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'co.aikar:acf-paper:+'
+    implementation 'com.github.hazae41:mc-kutils:+'
+}

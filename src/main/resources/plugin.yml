@@ -1,9 +1,9 @@
 name: GravityGuild
 main: com.johncorby.gravityguild.Mainkt
-version: 3.0
+version: 3.0-SNAPSHOT
 author: JohnCorby
 description: Minigame for my server
-depend: [FastAsyncWorldEdit, PlugMan]
+softdepend: [PlugMan]
 
 permissions:
   gravityguild.admin:

@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild
 
+import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.block.Biome
@@ -19,7 +20,7 @@ import java.util.*
  */
 val Entity.arenaIn get() = arenas.flatMap { it.value.instances }.find { world == it.world }
 
-private val arenas = mutableMapOf<String, ArenaBase>()
+val arenas = mutableMapOf<String, ArenaBase>()
 
 /**
  * base arena that [ArenaInstance]s are created from
@@ -54,12 +55,12 @@ class ArenaBase(val name: String) {
         arenas[name] = this
     }
 
-    fun remove() {
+    fun close() {
         // remove instances
         instances.forEach { it.close() }
 
         // delete world
-        PLUGIN.server.unloadWorld(world, false)
+        Bukkit.unloadWorld(world, false)
         world.worldFolder.deleteRecursively()
 
         arenas.remove(name)
@@ -72,14 +73,14 @@ class ArenaBase(val name: String) {
 /**
  * instance of [ArenaBase] where the actual games are held
  */
-class ArenaInstance(val base: ArenaBase, val id) : Listener {
+class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
     private val worldName = "${base.name}_instance_$id"
     lateinit var world: World
     private val players = mutableListOf<Player>()
 
     init {
         // register teleport events for players
-        PLUGIN.server.pluginManager.registerEvent(
+        Bukkit.getPluginManager().registerEvent(
             PlayerTeleportEvent::class.java,
             this,
             EventPriority.NORMAL,
@@ -96,7 +97,7 @@ class ArenaInstance(val base: ArenaBase, val id) : Listener {
 
         // copy/load base world
         world.worldFolder.copyRecursively(
-            File(PLUGIN.server.worldContainer, worldName),
+            File(Bukkit.getWorldContainer(), worldName),
             true
         )
         WorldCreator(worldName).createWorld()
@@ -109,7 +110,7 @@ class ArenaInstance(val base: ArenaBase, val id) : Listener {
         HandlerList.unregisterAll(this)
 
         // remove world
-        PLUGIN.server.unloadWorld(world, false)
+        Bukkit.unloadWorld(world, false)
         world.worldFolder.deleteRecursively()
 
         base.instances.remove(this)
