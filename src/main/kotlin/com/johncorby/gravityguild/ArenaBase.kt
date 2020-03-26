@@ -6,21 +6,18 @@ import org.bukkit.WorldCreator
 import org.bukkit.block.Biome
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.event.EventPriority
-import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.generator.ChunkGenerator
-import org.bukkit.plugin.EventExecutor
 import java.io.File
 import java.util.*
 
 /**
  * return [ArenaInstance] that [Entity] is in
  */
-val Entity.arenaIn get() = arenas.flatMap { it.value.instances }.find { world == it.world }
+val Entity.arenaIn get() = instances.find { world == it.world }
 
 val arenas = mutableMapOf<String, ArenaBase>()
+inline val instances get() = arenas.values.flatMap { it.instances }
 
 /**
  * base arena that [ArenaInstance]s are created from
@@ -31,7 +28,7 @@ val arenas = mutableMapOf<String, ArenaBase>()
 class ArenaBase(val name: String) {
     val instances = mutableListOf<ArenaInstance>()
     private val worldName = "gg arena $name base"
-    private val world: World
+    val world: World
 
     init {
         // init world
@@ -84,35 +81,20 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
     private val players = mutableListOf<Player>()
 
     init {
-        // register teleport events for players
-        Bukkit.getPluginManager().registerEvent(
-            PlayerTeleportEvent::class.java,
-            this,
-            EventPriority.NORMAL,
-            EventExecutor { _, event ->
-                event as PlayerTeleportEvent
-                when {
-                    event.from == event.to -> return@EventExecutor
-                    event.to == world -> event.player.joinArena()
-                    event.from == world -> event.player.leaveArena()
-                }
-            },
-            PLUGIN
-        )
-
         // copy/load base world
-        world.worldFolder.copyRecursively(
+        base.world.worldFolder.copyRecursively(
             File(Bukkit.getWorldContainer(), worldName),
             true
         )
-        WorldCreator(worldName).createWorld()
+        world = WorldCreator(worldName).createWorld()!!
+        world.isAutoSave = false
 
         base.instances.add(this)
     }
 
     fun close() {
-        // unregister event
-        HandlerList.unregisterAll(this)
+        // todo teleport back to lobby
+        players.forEach {  }
 
         // remove world
         Bukkit.unloadWorld(world, false)
@@ -121,15 +103,15 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
         base.instances.remove(this)
     }
 
-    private fun Player.joinArena() {
+    fun onJoin(player: Player) {
         TODO()
     }
 
-    private fun Player.leaveArena() {
+    fun onLeave(player: Player) {
         TODO()
     }
 
-    override fun equals(other: Any?) = (other as? ArenaInstance)?.id == id
+    override fun equals(other: Any?) = id == (other as? ArenaInstance)?.id
     override fun hashCode() = id
 
     override fun toString() = worldName

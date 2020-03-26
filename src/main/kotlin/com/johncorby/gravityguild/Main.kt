@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild
 
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var PLUGIN: Main
@@ -7,5 +8,15 @@ lateinit var PLUGIN: Main
 class Main : JavaPlugin() {
     override fun onEnable() {
         PLUGIN = this
+
+        Bukkit.getConsoleSender().info("enabled")
+    }
+
+    override fun onDisable() {
+        for (arena in arenas.values)
+            for (instance in arena.instances)
+                instance.close()
+
+        Bukkit.getConsoleSender().info("disabled")
     }
 }
