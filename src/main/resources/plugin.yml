@@ -4,6 +4,7 @@ version: 3.0-SNAPSHOT
 author: JohnCorby
 description: Minigame for my server
 softdepend: [PlugMan]
+api-version: 1.15
 
 permissions:
   gravityguild.admin:

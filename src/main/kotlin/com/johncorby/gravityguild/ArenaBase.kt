@@ -24,6 +24,9 @@ val arenas = mutableMapOf<String, ArenaBase>()
 
 /**
  * base arena that [ArenaInstance]s are created from
+ * template for instances
+ * cant be joined
+ * tracks instances
  */
 class ArenaBase(val name: String) {
     val instances = mutableListOf<ArenaInstance>()
