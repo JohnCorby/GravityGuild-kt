@@ -71,13 +71,15 @@ class ArenaBase(val name: String) {
 
     override fun equals(other: Any?) = name == (other as? ArenaBase)?.name
     override fun hashCode() = name.hashCode()
+
+    override fun toString() = worldName
 }
 
 /**
  * instance of [ArenaBase] where the actual games are held
  */
 class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
-    private val worldName = "${base.name}_instance_$id"
+    private val worldName = "gg arena ${base.name} instance $id"
     lateinit var world: World
     private val players = mutableListOf<Player>()
 
@@ -127,5 +129,8 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
         TODO()
     }
 
-//    override fun equals(other: Any?) = (other as? ArenaInstance).nam
+    override fun equals(other: Any?) = (other as? ArenaInstance)?.id == id
+    override fun hashCode() = id
+
+    override fun toString() = worldName
 }

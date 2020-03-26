@@ -3,25 +3,24 @@ package com.johncorby.gravityguild
 import hazae41.minecraft.kutils.bukkit.schedule
 
 /**
- * uses [sequence] and bukkit scheduling to run a suspendable function
+ * run [block] that you can pause for one tick with [suspend]
  *
  * @param batch how many operations (stuff between suspends) to do each run
  */
 fun runSuspendable(batch: Int = 1, block: suspend Suspendable.() -> Unit) {
-    val sequence = sequence<Int> {
-        block()
-        yield(SUSPEND_END)
-    }
+    val iterator = sequence(block).iterator()
 
     PLUGIN.schedule(period = 1) {
-        val result = sequence.take(batch)
-        if (SUSPEND_END in result) cancel()
+        repeat(batch) {
+            if (!iterator.hasNext()) {
+                cancel()
+                return@schedule
+            }
+            iterator.next()
+        }
     }
 }
 
-private typealias Suspendable = SequenceScope<Int>
+private typealias Suspendable = SequenceScope<Any?>
 
-private const val SUSPEND_PAUSE = 0
-private const val SUSPEND_END = 1
-
-suspend fun Suspendable.suspend() = yield(SUSPEND_PAUSE)
+suspend fun Suspendable.suspend() = yield(null)
