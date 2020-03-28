@@ -3,13 +3,13 @@ package com.johncorby.gravityguild
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
-import org.bukkit.block.Biome
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.generator.ChunkGenerator
 import java.io.File
 import java.util.*
+import kotlin.system.measureTimeMillis
 
 /**
  * return [ArenaInstance] that [Entity] is in
@@ -27,8 +27,8 @@ inline val instances get() = arenas.values.flatMap { it.instances }
  */
 class ArenaBase(val name: String) {
     val instances = mutableListOf<ArenaInstance>()
-    private val worldName = "gg arena $name base"
-    val world: World
+    private val worldName = "gg_arena_${name}_base"
+    lateinit var world: World
 
     init {
         // init world
@@ -39,18 +39,17 @@ class ArenaBase(val name: String) {
                 x: Int,
                 z: Int,
                 biome: BiomeGrid
-            ): ChunkData {
-                for (bx in 0..15)
-                    for (by in 0..255)
-                        for (bz in 0..15)
-                            biome.setBiome(bx, by, bz, Biome.THE_VOID)
-                return createChunkData(world)
-            }
+            ): ChunkData = createChunkData(world)
         }
-        world = WorldCreator(worldName)
-            .generator(generator)
-            .generateStructures(false)
-            .createWorld()!!
+        measureTimeMillis {
+            world = WorldCreator(worldName)
+                .generator(generator)
+                .generateStructures(false)
+                .createWorld()!!
+        }.also {
+            CONSOLE.info("world creation took ${it / 1000f} seconds")
+        }
+        world.keepSpawnInMemory = false
 
         arenas[name] = this
     }
@@ -76,7 +75,7 @@ class ArenaBase(val name: String) {
  * instance of [ArenaBase] where the actual games are held
  */
 class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
-    private val worldName = "gg arena ${base.name} instance $id"
+    private val worldName = "gg_arena_${base.name}_instance_$id"
     lateinit var world: World
     private val players = mutableListOf<Player>()
 
@@ -86,15 +85,20 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
             File(Bukkit.getWorldContainer(), worldName),
             true
         )
-        world = WorldCreator(worldName).createWorld()!!
+        measureTimeMillis {
+            world = WorldCreator(worldName).createWorld()!!
+        }.also {
+            CONSOLE.info("world creation took ${it / 1000f} seconds")
+        }
         world.isAutoSave = false
+        world.keepSpawnInMemory = false
 
         base.instances.add(this)
     }
 
     fun close() {
         // todo teleport back to lobby
-        players.forEach {  }
+//        players.forEach { }
 
         // remove world
         Bukkit.unloadWorld(world, false)

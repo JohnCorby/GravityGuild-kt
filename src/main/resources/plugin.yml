@@ -1,5 +1,5 @@
 name: GravityGuild
-main: com.johncorby.gravityguild.Mainkt
+main: com.johncorby.gravityguild.Main
 version: 3.0-SNAPSHOT
 author: JohnCorby
 description: Minigame for my server

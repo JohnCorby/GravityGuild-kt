@@ -6,10 +6,9 @@ import co.aikar.commands.InvalidCommandArgument
 import co.aikar.commands.PaperCommandManager
 import co.aikar.commands.annotation.*
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.io.PrintWriter
-import java.io.StringWriter
 
 private const val ADMIN_PERM = "gravityguild.admin"
 
@@ -32,48 +31,56 @@ object Command : BaseCommand() {
                     error("we made a fucky wucky!!! (check console for exception :3)")
                     error("error is: $t")
                 }
-
-                // print exception to console
-                val writer = StringWriter()
-                val stream = PrintWriter(writer)
-                t.printStackTrace(stream)
-
-                Bukkit.getConsoleSender().error(writer.toString())
                 true
             }
         }
     }
 
     @HelpCommand
-    fun help(player: Player, help: CommandHelp) {
-        player.info("--- help ---")
+    fun help(sender: CommandSender, help: CommandHelp) {
         help.showHelp()
     }
 
-    @Subcommand("reload|r")
+    @Subcommand("reload")
     @CommandPermission(ADMIN_PERM)
     @Description("reloads plugin (for debugging)")
-    fun reload(player: Player) {
+    fun reload(sender: CommandSender) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload ${PLUGIN.name}")
-        player.info("it is done")
+        sender.info("it is done")
     }
 
-    @Subcommand("arena add|a")
+    @Subcommand("arena add")
     @CommandPermission(ADMIN_PERM)
     @Description("adds an arena by name")
-    fun addArena(player: Player, name: String) {
+    fun addArena(sender: Player, name: String) {
         if (name in arenas) throw InvalidCommandArgument("arena $name already exists")
-        ArenaBase(name)
-        player.info("arena $name created")
+        ArenaBase(name).apply {
+            sender.teleport(Location(
+                world,
+                sender.location.x,
+                sender.location.y,
+                sender.location.z
+            ))
+        }
+
+        sender.info("arena $name created")
     }
 
-    @Subcommand("arena delete|d")
+    @Subcommand("arena delete")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arena")
     @Description("removes an arena by name")
-    fun delArena(player: Player, name: String) {
+    fun delArena(sender: CommandSender, name: String) {
         if (name !in arenas) throw InvalidCommandArgument("arena $name doesnt exist")
         arenas[name]!!.close()
-        player.info("arena $name deleted")
+        sender.info("arena $name deleted")
+    }
+
+    @Subcommand("setlobby")
+    @CommandPermission(ADMIN_PERM)
+    @Description("set location for lobby")
+    fun setLobby(sender: Player) {
+        // todo set lobby
+        sender.info("lobby set to current location")
     }
 }

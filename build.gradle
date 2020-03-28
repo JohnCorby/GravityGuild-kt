@@ -7,3 +7,7 @@ dependencies {
     implementation 'co.aikar:acf-paper:+'
     implementation 'com.github.hazae41:mc-kutils:+'
 }
+
+compileKotlin {
+    kotlinOptions.javaParameters = true
+}

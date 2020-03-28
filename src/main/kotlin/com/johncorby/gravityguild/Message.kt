@@ -3,8 +3,10 @@ package com.johncorby.gravityguild
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 
+inline val CONSOLE get() = PLUGIN.server.consoleSender
+
 private fun CommandSender.send(color: ChatColor, message: String) =
-    sendMessage("${ChatColor.AQUA}[GravityGuild]$color$message")
+    sendMessage("${ChatColor.AQUA}[GravityGuild] $color$message")
 
 fun CommandSender.info(message: String) = send(ChatColor.RESET, message)
 fun CommandSender.debug(message: String) = send(ChatColor.GREEN, message)

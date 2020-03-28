@@ -9,6 +9,10 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         PLUGIN = this
 
+        Command
+        Listener
+        Config
+
         Bukkit.getConsoleSender().info("enabled")
     }
 
