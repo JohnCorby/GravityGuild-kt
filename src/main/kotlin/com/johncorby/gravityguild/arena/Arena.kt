@@ -30,9 +30,10 @@ inline val instances get() = arenas.values.flatMap { it.instances }
  * tracks instances
  */
 class ArenaBase(val name: String) : ConfigSection(Data, "arenas.$name") {
-    val instances = mutableListOf<ArenaInstance>()
     private val worldName = "gg_arena_${name}_base"
     lateinit var world: World
+
+    val instances = mutableListOf<ArenaInstance>()
 
     init {
         // init world
@@ -96,8 +97,8 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
                 true
             )
             world = WorldCreator(worldName).createWorld()!!
-            world.isAutoSave = false
             world.keepSpawnInMemory = false
+            world.isAutoSave = false
         }
 
         base.instances.add(this)

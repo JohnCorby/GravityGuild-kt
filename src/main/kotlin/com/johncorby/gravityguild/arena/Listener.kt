@@ -1,6 +1,7 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.PLUGIN
+import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.schedule
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -14,21 +15,17 @@ object Listener : Listener {
             Listener,
             PLUGIN
         )
-    }
 
-    @EventHandler
-    fun onJoin(event: PlayerJoinEvent) = event.player.arenaIn?.onJoin(event.player)
+        PLUGIN.listen<PlayerJoinEvent> { it.player.arenaIn?.onJoin(it.player) }
+        PLUGIN.listen<PlayerJoinEvent> { it.player.arenaIn?.onLeave(it.player) }
 
-    @EventHandler
-    fun onLeave(event: PlayerQuitEvent) = event.player.arenaIn?.onLeave(event.player)
-
-    @EventHandler
-    fun onTeleport(event: PlayerTeleportEvent) {
-        if (event.from.world == event.to.world) return
-        instances.forEach {
-            when {
-                event.to.world == it.world -> PLUGIN.schedule { it.onJoin(event.player) }
-                event.from.world == it.world -> it.onLeave(event.player)
+        PLUGIN.listen<PlayerTeleportEvent> { e ->
+            if (e.from.world == e.to.world) return@listen
+            instances.forEach {
+                when {
+                    e.to.world == it.world -> PLUGIN.schedule { it.onJoin(e.player) }
+                    e.from.world == it.world -> it.onLeave(e.player)
+                }
             }
         }
     }
