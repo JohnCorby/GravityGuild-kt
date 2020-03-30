@@ -1,5 +1,6 @@
-package com.johncorby.gravityguild
+package com.johncorby.gravityguild.arena
 
+import com.johncorby.gravityguild.PLUGIN
 import hazae41.minecraft.kutils.bukkit.schedule
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -9,7 +10,10 @@ import org.bukkit.event.player.PlayerTeleportEvent
 
 object Listener : Listener {
     init {
-        PLUGIN.server.pluginManager.registerEvents(Listener, PLUGIN)
+        PLUGIN.server.pluginManager.registerEvents(
+            Listener,
+            PLUGIN
+        )
     }
 
     @EventHandler

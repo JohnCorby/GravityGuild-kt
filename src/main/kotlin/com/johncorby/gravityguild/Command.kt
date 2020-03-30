@@ -1,29 +1,31 @@
 package com.johncorby.gravityguild
 
-import co.aikar.commands.BaseCommand
-import co.aikar.commands.CommandHelp
-import co.aikar.commands.InvalidCommandArgument
-import co.aikar.commands.PaperCommandManager
+import co.aikar.commands.*
 import co.aikar.commands.annotation.*
+import com.johncorby.gravityguild.arena.ArenaBase
+import com.johncorby.gravityguild.arena.arenas
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 private const val ADMIN_PERM = "gravityguild.admin"
 
-
-
 @CommandAlias("gravityguild|gg")
 object Command : BaseCommand() {
     init {
         PaperCommandManager(PLUGIN).apply {
-            registerCommand(this@Command)
-
             enableUnstableAPI("help")
 
-            // arena tab completion
+            // arena
             commandCompletions.registerCompletion("arena") { c -> arenas.keys.filter { it.startsWith(c.input) } }
+            commandContexts.registerContext(ArenaBase::class.java) { c ->
+                val name = c.popFirstArg()
+                arenas[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+            }
+
+            commandConditions.addCondition("lobby") { c ->
+                if (Data.lobby == null) throw ConditionFailedException("you need to set a lobby first")
+            }
 
             // error handler
             setDefaultExceptionHandler { _, _, sender, _, t ->
@@ -33,6 +35,8 @@ object Command : BaseCommand() {
                 }
                 true
             }
+
+            registerCommand(this@Command)
         }
     }
 
@@ -42,45 +46,57 @@ object Command : BaseCommand() {
     }
 
     @Subcommand("reload")
-    @CommandPermission(ADMIN_PERM)
     @Description("reloads plugin (for debugging)")
+    @CommandPermission(ADMIN_PERM)
     fun reload(sender: CommandSender) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload ${PLUGIN.name}")
         sender.info("it is done")
     }
 
-    @Subcommand("arena add")
+    @Subcommand("arena create")
+    @Description("creates an arena by name")
     @CommandPermission(ADMIN_PERM)
-    @Description("adds an arena by name")
-    fun addArena(sender: Player, name: String) {
+    @Conditions("lobby")
+    fun createArena(sender: CommandSender, name: String) {
         if (name in arenas) throw InvalidCommandArgument("arena $name already exists")
-        ArenaBase(name).apply {
-            sender.teleport(Location(
-                world,
-                sender.location.x,
-                sender.location.y,
-                sender.location.z
-            ))
-        }
+        ArenaBase(name)
 
         sender.info("arena $name created")
     }
 
     @Subcommand("arena delete")
+    @Description("removes an arena by name")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arena")
-    @Description("removes an arena by name")
-    fun delArena(sender: CommandSender, name: String) {
-        if (name !in arenas) throw InvalidCommandArgument("arena $name doesnt exist")
-        arenas[name]!!.close()
+    fun deleteArena(sender: CommandSender, arena: ArenaBase) {
+        arena.close()
         sender.info("arena $name deleted")
     }
 
-    @Subcommand("setlobby")
+    @Subcommand("arena edit")
+    @Description("teleports to an arena base world to edit it")
     @CommandPermission(ADMIN_PERM)
-    @Description("set location for lobby")
+    @CommandCompletion("@arena")
+    @Conditions("lobby")
+    fun editArena(sender: Player, arena: ArenaBase) {
+        sender.info("teleporting to ${arena.name} base world")
+        sender.teleport(arena.world.spawnLocation)
+    }
+
+    @Subcommand("lobby set")
+    @Description("sets location for lobby")
+    @CommandPermission(ADMIN_PERM)
     fun setLobby(sender: Player) {
         // todo set lobby
+        Data.lobby = sender.location
         sender.info("lobby set to current location")
+    }
+
+    @Subcommand("lobby")
+    @Description("teleports to lobby")
+    @Conditions("lobby")
+    fun lobby(sender: Player) {
+        sender.info("teleporting to lobby")
+        sender.teleport(Data.lobby!!)
     }
 }

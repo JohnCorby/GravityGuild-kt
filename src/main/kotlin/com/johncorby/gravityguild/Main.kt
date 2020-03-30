@@ -1,5 +1,7 @@
 package com.johncorby.gravityguild
 
+import com.johncorby.gravityguild.arena.Listener
+import com.johncorby.gravityguild.arena.arenas
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -9,9 +11,10 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         PLUGIN = this
 
-        Command
+        Options
+        Data
         Listener
-        Config
+        Command
 
         Bukkit.getConsoleSender().info("enabled")
     }
