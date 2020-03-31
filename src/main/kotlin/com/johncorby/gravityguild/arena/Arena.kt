@@ -22,6 +22,7 @@ import java.util.*
  * return [ArenaInstance] that [Entity] is in
  */
 val Entity.arenaIn get() = instances.find { world == it.world }
+inline val Entity.inArena get() = arenaIn != null
 
 val arenas = mutableMapOf<String, ArenaBase>()
 inline val instances get() = arenas.values.flatMap { it.instances }
