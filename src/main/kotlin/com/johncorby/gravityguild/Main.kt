@@ -16,7 +16,7 @@ class Main : JavaPlugin() {
         Listener
         Command
 
-        Bukkit.getConsoleSender().info("enabled")
+        info("enabled")
     }
 
     override fun onDisable() {
@@ -24,6 +24,6 @@ class Main : JavaPlugin() {
             for (instance in arena.instances)
                 instance.close()
 
-        Bukkit.getConsoleSender().info("disabled")
+        info("disabled")
     }
 }

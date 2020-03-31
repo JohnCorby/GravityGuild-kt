@@ -13,7 +13,7 @@ fun CommandSender.debug(message: String) {
     if (Options.debug) send(ChatColor.GREEN, message)
 }
 
-private val CONSOLE get() = PLUGIN.server.consoleSender
+val CONSOLE get() = PLUGIN.server.consoleSender
 fun info(message: String) = CONSOLE.info(message)
 fun warn(message: String) = CONSOLE.warn(message)
 fun error(message: String) = CONSOLE.error(message)

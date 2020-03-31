@@ -3,7 +3,6 @@ package com.johncorby.gravityguild.arena
 import com.johncorby.gravityguild.PLUGIN
 import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.schedule
-import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -17,7 +16,7 @@ object Listener : Listener {
         )
 
         PLUGIN.listen<PlayerJoinEvent> { it.player.arenaIn?.onJoin(it.player) }
-        PLUGIN.listen<PlayerJoinEvent> { it.player.arenaIn?.onLeave(it.player) }
+        PLUGIN.listen<PlayerQuitEvent> { it.player.arenaIn?.onLeave(it.player) }
 
         PLUGIN.listen<PlayerTeleportEvent> { e ->
             if (e.from.world == e.to.world) return@listen

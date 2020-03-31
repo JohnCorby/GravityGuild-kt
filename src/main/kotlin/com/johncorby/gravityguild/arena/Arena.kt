@@ -1,8 +1,11 @@
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.*
+import com.johncorby.gravityguild.Command
+import com.johncorby.gravityguild.Data
+import com.johncorby.gravityguild.PLUGIN
+import com.johncorby.gravityguild.time
 import hazae41.minecraft.kutils.bukkit.ConfigSection
-import hazae41.minecraft.kutils.bukkit.section
+import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
@@ -86,7 +89,8 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
     private val worldName = "gg_arena_${base.name}_instance_$id"
     lateinit var world: World
 
-    private val players = mutableMapOf<String, Player>()
+    private val players by lazy { server.onlinePlayers.filter { it.world == world } }
+
     private val coolDownTasks = mutableMapOf<Player, BukkitTask>()
 
     init {
@@ -106,11 +110,11 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
 
     fun close() {
         // teleport back to lobby
-        players.values.forEach { Command.lobby(it) }
+        players.forEach { Command.lobby(it) }
 
         // remove world
         time("world $worldName removal") {
-            Bukkit.unloadWorld(world, false)
+            server.unloadWorld(world, false)
             world.worldFolder.deleteRecursively()
         }
 
@@ -127,14 +131,10 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
                 TODO()
             }
         }.runTaskLater(PLUGIN, 10 * 20)
-
-        players[name] = this
     }
 
     fun onLeave(player: Player) = player.apply {
 
-
-        players.remove(name)
     }
 
     override fun equals(other: Any?) = id == (other as? ArenaInstance)?.id

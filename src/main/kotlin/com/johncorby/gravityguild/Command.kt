@@ -4,7 +4,7 @@ import co.aikar.commands.*
 import co.aikar.commands.annotation.*
 import com.johncorby.gravityguild.arena.ArenaBase
 import com.johncorby.gravityguild.arena.arenas
-import org.bukkit.Bukkit
+import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -49,7 +49,7 @@ object Command : BaseCommand() {
     @Description("reloads plugin (for debugging)")
     @CommandPermission(ADMIN_PERM)
     fun reload(sender: CommandSender) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload ${PLUGIN.name}")
+        server.dispatchCommand(CONSOLE, "plugman reload ${PLUGIN.name}")
         sender.info("it is done")
     }
 
