@@ -8,7 +8,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.WitherSkull
 import org.bukkit.event.Event
-import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.entity.ProjectileHitEvent
@@ -18,24 +17,17 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 
-object Listener : Listener {
+object Listener {
     init {
-        PLUGIN.server.pluginManager.registerEvents(
-            Listener,
-            PLUGIN
-        )
-
         listen<PlayerJoinEvent> { player.arenaIn?.onJoin(player) }
         listen<PlayerQuitEvent> { player.arenaIn?.onLeave(player) }
 
         listen<PlayerTeleportEvent> {
             if (from.world == to.world) return@listen
-            instances.forEach {
-                // trigger proper callbacks
-                when {
-                    to.world == it.world -> PLUGIN.schedule { it.onJoin(player) }
-                    from.world == it.world -> it.onLeave(player)
-                }
+            // schedule 1 tick later so this happens after the teleport
+            PLUGIN.schedule {
+                arenaGames.find { to.world == it.world }?.onJoin(player)
+                arenaGames.find { from.world == it.world }?.onLeave(player)
             }
         }
 
@@ -66,6 +58,7 @@ object Listener : Listener {
         }
 
 
+
         listen<PlayerInteractEvent> {
             if (!player.inArena) return@listen
             if (action !in arrayOf(Action.LEFT_CLICK_BLOCK, Action.LEFT_CLICK_AIR)) return@listen
@@ -78,7 +71,7 @@ object Listener : Listener {
         listen<PlayerDeathEvent> {
             if (!entity.inArena) return@listen
 
-            // reset damage
+            // reset damage instead of cancelling so hit animation still plays
             entity.health = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
             // todo message, life, respawn/kick, etc
         }

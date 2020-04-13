@@ -2,9 +2,10 @@ package com.johncorby.gravityguild
 
 import co.aikar.commands.*
 import co.aikar.commands.annotation.*
-import com.johncorby.gravityguild.arena.ArenaBase
-import com.johncorby.gravityguild.arena.arenas
+import com.johncorby.gravityguild.arena.ArenaWorld
+import com.johncorby.gravityguild.arena.arenaWorlds
 import hazae41.minecraft.kutils.bukkit.server
+import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -17,10 +18,10 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arena") { c -> arenas.keys.filter { it.startsWith(c.input) } }
-            commandContexts.registerContext(ArenaBase::class.java) { c ->
+            commandCompletions.registerCompletion("arenaWorld") { c -> arenaWorlds.keys.filter { it.startsWith(c.input) } }
+            commandContexts.registerContext(World::class.java) { c ->
                 val name = c.popFirstArg()
-                arenas[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+                arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
             }
 
             commandConditions.addCondition("lobby") { c ->
@@ -56,10 +57,9 @@ object Command : BaseCommand() {
     @Subcommand("arena create")
     @Description("creates an arena by name")
     @CommandPermission(ADMIN_PERM)
-    @Conditions("lobby")
     fun createArena(sender: CommandSender, name: String) {
-        if (name in arenas) throw InvalidCommandArgument("arena $name already exists")
-        ArenaBase(name)
+        if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
+        ArenaWorld.create(name)
 
         sender.info("arena $name created")
     }
@@ -67,27 +67,34 @@ object Command : BaseCommand() {
     @Subcommand("arena delete")
     @Description("removes an arena by name")
     @CommandPermission(ADMIN_PERM)
-    @CommandCompletion("@arena")
-    fun deleteArena(sender: CommandSender, arena: ArenaBase) {
-        arena.close()
+    @CommandCompletion("@arenaWorld")
+    fun deleteArena(sender: CommandSender, arenaWorld: World) {
+        ArenaWorld.delete(arenaWorld)
+
         sender.info("arena $name deleted")
     }
 
     @Subcommand("arena edit")
-    @Description("teleports to an arena base world to edit it")
+    @Description("teleports you to an arena world to edit it")
     @CommandPermission(ADMIN_PERM)
-    @CommandCompletion("@arena")
+    @CommandCompletion("@arenaWorld")
     @Conditions("lobby")
-    fun editArena(sender: Player, arena: ArenaBase) {
-        sender.info("teleporting to ${arena.name} base world")
-        sender.teleport(arena.world.spawnLocation)
+    fun editArena(sender: Player, arenaWorld: World) {
+        sender.info("teleporting to ${arenaWorld.name} base world")
+        sender.teleport(arenaWorld.spawnLocation)
+    }
+
+    @Subcommand("arena join")
+    @Description("join a game")
+    @Conditions("lobby")
+    fun joinArena(sender: Player) {
+        // todo
     }
 
     @Subcommand("lobby set")
     @Description("sets location for lobby")
     @CommandPermission(ADMIN_PERM)
     fun setLobby(sender: Player) {
-        // todo set lobby
         Data.lobby = sender.location
         sender.info("lobby set to current location")
     }

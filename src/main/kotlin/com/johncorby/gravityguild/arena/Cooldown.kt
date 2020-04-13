@@ -6,7 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable
 /**
  * represents invincibility cooldown for players
  */
-class Cooldown(val arena: ArenaInstance, val player: Player) : BukkitRunnable() {
+class Cooldown(val arena: ArenaGame, val player: Player) : BukkitRunnable() {
     fun start() {
         // todo glow, invincible
     }

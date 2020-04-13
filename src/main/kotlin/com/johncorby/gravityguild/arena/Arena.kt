@@ -1,10 +1,7 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Command
-import com.johncorby.gravityguild.Data
-import com.johncorby.gravityguild.PLUGIN
 import com.johncorby.gravityguild.time
-import hazae41.minecraft.kutils.bukkit.ConfigSection
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.Bukkit
 import org.bukkit.World
@@ -13,34 +10,27 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.generator.ChunkGenerator
-import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.scheduler.BukkitTask
 import java.io.File
 import java.util.*
 
 /**
- * return [ArenaInstance] that [Entity] is in
+ * return [ArenaGame] that [Entity] is in
  */
-val Entity.arenaIn get() = instances.find { world == it.world }
+val Entity.arenaIn get() = arenaGames.find { world == it.world }
 inline val Entity.inArena get() = arenaIn != null
 
-val arenas = mutableMapOf<String, ArenaBase>()
-inline val instances get() = arenas.values.flatMap { it.instances }
+val arenaWorlds = mutableMapOf<String, World>()
+val arenaGames = mutableListOf<ArenaGame>()
 
 /**
- * base arena that [ArenaInstance]s are created from
- * template for instances
- * cant be joined
- * tracks instances
+ * a base [World] to be copied by each [ArenaGame]
  */
-class ArenaBase(val name: String) : ConfigSection(Data, "arenas.$name") {
-    private val worldName = "gg_arena_${name}_base"
-    lateinit var world: World
-
-    val instances = mutableListOf<ArenaInstance>()
-
-    init {
-        // init world
+object ArenaWorld {
+    /**
+     * create arena world from [name]
+     */
+    fun create(name: String) {
+        val worldName = "gg_arena_${name}_base"
         time("world $worldName creation") {
             val generator = object : ChunkGenerator() {
                 override fun generateChunkData(
@@ -51,53 +41,39 @@ class ArenaBase(val name: String) : ConfigSection(Data, "arenas.$name") {
                     biome: BiomeGrid
                 ): ChunkData = createChunkData(world)
             }
-            world = WorldCreator(worldName)
+            val world = WorldCreator(worldName)
                 .generator(generator)
                 .generateStructures(false)
                 .createWorld()!!
             world.keepSpawnInMemory = false
         }
-
-        arenas[name] = this
-
-        parent[path] = "stub"
     }
 
-    fun close() {
-        // remove instances
-        instances.forEach { it.close() }
-
-        // delete world
-        time("world $worldName removal") {
+    /**
+     * delete arena [world]
+     */
+    fun delete(world: World) {
+        time("world ${world.name} removal") {
             // todo save option seems to do nothing, it takes just as long either way, see https://www.spigotmc.org/threads/loading-worlds-async-with-no-lag.268731/
             Bukkit.unloadWorld(world, false)
             world.worldFolder.deleteRecursively()
         }
-
-        arenas.remove(name)
-
-        parent[path] = null
     }
-
-    override fun equals(other: Any?) = name == (other as? ArenaBase)?.name
-    override fun hashCode() = name.hashCode()
 }
 
 /**
- * instance of [ArenaBase] where the actual games are held
+ * instance of [ArenaWorld] where the actual games are held
  */
-class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
-    private val worldName = "gg_arena_${base.name}_instance_$id"
+class ArenaGame(val name: String, val id: Int) : Listener {
+    private val worldName = "gg_arena_${name}_instance_$id"
     lateinit var world: World
 
-    private val players by lazy { server.onlinePlayers.filter { it.world == world } }
-
-    private val coolDownTasks = mutableMapOf<Player, BukkitTask>()
+    private val players get() = server.onlinePlayers.filter { it.world == world }
 
     init {
         // copy/load base world
         time("world $worldName creation") {
-            base.world.worldFolder.copyRecursively(
+            arenaWorlds[name]!!.worldFolder.copyRecursively(
                 File(Bukkit.getWorldContainer(), worldName),
                 true
             )
@@ -106,7 +82,7 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
             world.isAutoSave = false
         }
 
-        base.instances.add(this)
+        arenaGames.add(this)
     }
 
     fun close() {
@@ -119,25 +95,30 @@ class ArenaInstance(val base: ArenaBase, val id: Int) : Listener {
             world.worldFolder.deleteRecursively()
         }
 
-        base.instances.remove(this)
+        arenaGames.remove(this)
     }
 
+    /**
+     * called after a join occurs
+     */
     fun onJoin(player: Player) = player.apply {
-        // start cooldown
-        // todo cooldown can be started any time and ended either after a certain period of time or on command (including during the certain period of time)
-
-
-        coolDownTasks[player] = object : BukkitRunnable() {
-            override fun run() {
-                TODO()
-            }
-        }.runTaskLater(PLUGIN, 10 * 20)
+        // todo start cooldown
+        //  cooldown can be started any time and ended either after a certain period of time or on command (including during the certain period of time)
     }
 
+    /**
+     * called after a leave occurs
+     */
     fun onLeave(player: Player) = player.apply {
+        // todo stop cooldowns
 
+        // close game is no more players
+        if (players.isEmpty()) close()
     }
 
-    override fun equals(other: Any?) = id == (other as? ArenaInstance)?.id
-    override fun hashCode() = id
+    override fun equals(other: Any?) = (other as? ArenaGame)?.let {
+        it.name == name && it.id == id
+    } ?: false
+
+    override fun hashCode() = Objects.hash(name, id)
 }
