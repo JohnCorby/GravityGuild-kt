@@ -19,7 +19,11 @@ import java.util.*
 val Entity.arenaIn get() = arenaGames.find { world == it.world }
 inline val Entity.inArena get() = arenaIn != null
 
-val arenaWorlds = mutableMapOf<String, World>()
+const val WORLD_PREFIX = "gg_arena_"
+val arenaWorlds
+    get() = server.worlds
+        .filter { it.name.startsWith(WORLD_PREFIX) }
+        .associateBy { it.name.drop(WORLD_PREFIX.length) }
 val arenaGames = mutableListOf<ArenaGame>()
 
 /**
@@ -30,7 +34,7 @@ object ArenaWorld {
      * create arena world from [name]
      */
     fun create(name: String) {
-        val worldName = "gg_arena_${name}_base"
+        val worldName = "$WORLD_PREFIX$name"
         time("world $worldName creation") {
             val generator = object : ChunkGenerator() {
                 override fun generateChunkData(
@@ -75,7 +79,7 @@ class ArenaGame : Listener {
 
     private val id = generateId()
 
-    private val worldName = "gg_arena_${name}_instance_$id"
+    private val worldName = "$WORLD_PREFIX$name$$id"
     lateinit var world: World
 
     private val players get() = server.onlinePlayers.filter { it.world == world }
