@@ -3,6 +3,7 @@ package com.johncorby.gravityguild.arena
 import com.johncorby.gravityguild.Command
 import com.johncorby.gravityguild.time
 import hazae41.minecraft.kutils.bukkit.server
+import hazae41.minecraft.kutils.get
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
@@ -79,7 +80,7 @@ class ArenaGame : Listener {
 
     private val id = generateId()
 
-    private val worldName = "$WORLD_PREFIX$name$$id"
+    private val worldName = "$WORLD_PREFIX$name$id"
     lateinit var world: World
 
     private val players get() = server.onlinePlayers.filter { it.world == world }
@@ -88,10 +89,12 @@ class ArenaGame : Listener {
     init {
         // copy/load base world
         time("world $worldName creation") {
-            arenaWorlds[name]!!.worldFolder.copyRecursively(
-                File(Bukkit.getWorldContainer(), worldName),
-                true
-            )
+            val baseWorldFolder = arenaWorlds[name]!!.worldFolder
+            val gameWorldFolder = server.worldContainer[worldName]
+            baseWorldFolder.copyRecursively(gameWorldFolder, true)
+            // deleting this ensures the server doesnt prevent loading this duplicated world
+            gameWorldFolder["uid.dat"].delete()
+
             world = WorldCreator(worldName).createWorld()!!
             world.keepSpawnInMemory = false
             world.isAutoSave = false
