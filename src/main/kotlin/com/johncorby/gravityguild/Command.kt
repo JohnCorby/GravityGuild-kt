@@ -61,6 +61,8 @@ object Command : BaseCommand() {
 
         ArenaWorld.create(name)
         sender.info("arena $name created")
+
+        editArena(sender as Player, name)
     }
 
     @Subcommand("arena delete")

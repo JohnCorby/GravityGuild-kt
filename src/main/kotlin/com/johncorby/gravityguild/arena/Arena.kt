@@ -51,6 +51,8 @@ object ArenaWorld {
                 .generateStructures(false)
                 .createWorld()!!
             world.keepSpawnInMemory = false
+            // for some reason it doesnt appear to save on world creation?
+            world.save()
         }
     }
 

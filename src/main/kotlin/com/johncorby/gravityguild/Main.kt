@@ -7,10 +7,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var PLUGIN: Main
 
-/*
-todo
-    for some reason, with an arena named "bruh", it generates a normal overworld on game creation (the base world is still empty)
- */
 class Main : JavaPlugin() {
     override fun onEnable() {
         PLUGIN = this
