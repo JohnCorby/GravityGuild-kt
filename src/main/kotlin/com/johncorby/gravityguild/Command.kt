@@ -2,10 +2,8 @@ package com.johncorby.gravityguild
 
 import co.aikar.commands.*
 import co.aikar.commands.annotation.*
-import com.johncorby.gravityguild.arena.ArenaWorld
-import com.johncorby.gravityguild.arena.arenaWorlds
+import com.johncorby.gravityguild.arena.*
 import hazae41.minecraft.kutils.bukkit.server
-import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -19,10 +17,10 @@ object Command : BaseCommand() {
 
             // arena
             commandCompletions.registerCompletion("arenaWorld") { c -> arenaWorlds.keys.filter { it.startsWith(c.input) } }
-            commandContexts.registerContext(World::class.java) { c ->
-                val name = c.popFirstArg()
-                arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
-            }
+//            commandContexts.registerContext(World::class.java) { c ->
+//                val name = c.popFirstArg()
+//                arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+//            }
 
             commandConditions.addCondition("lobby") { c ->
                 if (Data.lobby == null) throw ConditionFailedException("you need to set a lobby first")
@@ -54,13 +52,14 @@ object Command : BaseCommand() {
         sender.info("it is done")
     }
 
+
     @Subcommand("arena create")
     @Description("creates an arena by name")
     @CommandPermission(ADMIN_PERM)
     fun createArena(sender: CommandSender, name: String) {
         if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
-        ArenaWorld.create(name)
 
+        ArenaWorld.create(name)
         sender.info("arena $name created")
     }
 
@@ -68,9 +67,10 @@ object Command : BaseCommand() {
     @Description("removes an arena by name")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arenaWorld")
-    fun deleteArena(sender: CommandSender, arenaWorld: World) {
-        ArenaWorld.delete(arenaWorld)
+    fun deleteArena(sender: CommandSender, name: String) {
+        val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
+        ArenaWorld.delete(arenaWorld)
         sender.info("arena $name deleted")
     }
 
@@ -79,24 +79,45 @@ object Command : BaseCommand() {
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arenaWorld")
     @Conditions("lobby")
-    fun editArena(sender: Player, arenaWorld: World) {
-        sender.info("teleporting to ${arenaWorld.name} base world")
+    fun editArena(sender: Player, name: String) {
+        val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+        sender.info("teleporting to $name base world")
         sender.teleport(arenaWorld.spawnLocation)
     }
 
     @Subcommand("arena join")
-    @Description("join a game")
+    @Description("join an arena")
     @Conditions("lobby")
     fun joinArena(sender: Player) {
-        // todo
+        if (sender.inArena) throw InvalidCommandArgument("you are already in an arena")
+
+        // teleport to non full game with most players in it
+        // or a new game if there is none
+        sender.info("joining arena")
+        arenaGames
+            .filter { it.numPlayers != Options.maxPlayers }
+            .maxBy { it.numPlayers }
+            .run { this ?: ArenaGame() }
+            .run { sender.teleport(world.spawnLocation) }
     }
+
+    @Subcommand("arena leave")
+    @Description("leave the arena you are in")
+    @Conditions("lobby")
+    fun leaveArena(sender: Player) {
+        if (!sender.inArena) throw InvalidCommandArgument("you are not in an arena")
+
+        sender.info("leaving arena")
+        lobby(sender)
+    }
+
 
     @Subcommand("lobby set")
     @Description("sets location for lobby")
     @CommandPermission(ADMIN_PERM)
     fun setLobby(sender: Player) {
         Data.lobby = sender.location
-        sender.info("lobby set to current location")
+        sender.info("lobby set to current position/direction")
     }
 
     @Subcommand("lobby")

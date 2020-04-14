@@ -1,2 +1,5 @@
 # if debug messages should print
 debug: true
+
+# the maximum number of players an arena can hold
+max-players: 10

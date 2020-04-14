@@ -64,11 +64,22 @@ object ArenaWorld {
 /**
  * instance of [ArenaWorld] where the actual games are held
  */
-class ArenaGame(val name: String, val id: Int) : Listener {
+class ArenaGame : Listener {
+    private val name = arenaWorlds.keys.random()
+
+    private fun generateId(): Int = arenaGames.map { it.id }.let { ids ->
+        var newId = 0
+        while (newId in ids) newId++
+        newId
+    }
+
+    private val id = generateId()
+
     private val worldName = "gg_arena_${name}_instance_$id"
     lateinit var world: World
 
     private val players get() = server.onlinePlayers.filter { it.world == world }
+    val numPlayers get() = players.size
 
     init {
         // copy/load base world
@@ -113,6 +124,7 @@ class ArenaGame(val name: String, val id: Int) : Listener {
         // todo stop cooldowns
 
         // close game is no more players
+        // todo might call close twice if onLeave was called when closing game and kicking players out
         if (players.isEmpty()) close()
     }
 
