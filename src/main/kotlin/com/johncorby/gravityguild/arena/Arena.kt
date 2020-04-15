@@ -98,6 +98,7 @@ class ArenaGame : Listener {
 
                 val baseWorldFolder = baseWorld.worldFolder
                 val gameWorldFolder = server.worldContainer[worldName]
+                // todo sometimes does this: java.io.IOException: Source file wasn't copied completely, length of destination file differs.
                 baseWorldFolder.copyRecursively(gameWorldFolder, true)
                 // deleting this ensures the server doesnt prevent loading this duplicated world
                 gameWorldFolder["uid.dat"].delete()
@@ -137,9 +138,9 @@ class ArenaGame : Listener {
     fun onLeave(player: Player) = player.apply {
         // todo stop cooldowns
 
-        // close game is no more players
-        // todo might call close twice if onLeave was called when closing game and kicking players out
-        if (players.isEmpty()) close()
+        // close game if only one player left
+        // todo probably wont call close twice if onLeave was called when closing game and kicking players out
+        if (players.size <= 1) close()
     }
 
     override fun equals(other: Any?) = (other as? ArenaGame)?.let {

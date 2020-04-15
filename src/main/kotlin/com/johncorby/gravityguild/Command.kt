@@ -80,6 +80,7 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun editArena(sender: Player, name: String) {
         val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+
         sender.info("teleporting to $name base world")
         sender.teleport(arenaWorld.spawnLocation)
     }
@@ -89,6 +90,7 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun joinArena(sender: Player) {
         if (sender.inArena) throw InvalidCommandArgument("you are already in an arena")
+        if (arenaWorlds.isEmpty()) throw InvalidCommandArgument("there are currently no arenas")
 
         // teleport to non full game with most players in it
         // or a new game if there is none

@@ -20,7 +20,7 @@ class Main : JavaPlugin() {
 
     override fun onDisable() {
         // clone to prevent exception
-        for (game in ArrayList(arenaGames)) game.close()
+        for (game in arenaGames.toList()) game.close()
 
         info("disabled")
     }

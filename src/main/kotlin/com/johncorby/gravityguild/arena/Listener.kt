@@ -2,6 +2,8 @@ package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.johncorby.gravityguild.PLUGIN
+import com.johncorby.gravityguild.info
+import com.johncorby.gravityguild.warn
 import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.schedule
 import org.bukkit.attribute.Attribute
@@ -19,7 +21,11 @@ import org.bukkit.event.player.PlayerTeleportEvent
 
 object Listener {
     init {
-        listen<PlayerJoinEvent> { player.arenaIn?.onJoin(player) }
+        listen<PlayerJoinEvent> {
+            player.warn("this plugin is actively in development!")
+            player.warn("submit any bugs you find at https://github.com/johncorby/gravityguild-kt/issues")
+            player.arenaIn?.onJoin(player)
+        }
         listen<PlayerQuitEvent> { player.arenaIn?.onLeave(player) }
 
         listen<PlayerTeleportEvent> {
@@ -69,6 +75,7 @@ object Listener {
             isCancelled = true
         }
         listen<PlayerDeathEvent> {
+            // todo this doesnt actually work. it shows you the death screen but also resets your health bruh
             if (!entity.inArena) return@listen
 
             // reset damage instead of cancelling so hit animation still plays
