@@ -32,4 +32,4 @@ suspend fun Suspendable.suspend() = yield(null)
  * run [block] and print how long it took
  */
 fun time(what: String, block: () -> Unit) =
-    (measureTimeMillis(block) / 1000f).also { debug("$what took $it seconds") }
+    (measureTimeMillis(block) / 50f).also { debug("$what took $it ticks") }

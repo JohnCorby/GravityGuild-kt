@@ -20,11 +20,24 @@ val Entity.arenaIn get() = arenaGames.find { world == it.world }
 inline val Entity.inArena get() = arenaIn != null
 
 const val WORLD_PREFIX = "gg_arena_"
+const val GAME_WORLD_SUFFIX = "_game"
 val arenaWorlds
     get() = server.worlds
-        .filter { it.name.startsWith(WORLD_PREFIX) }
+        .filter { it.name.startsWith(WORLD_PREFIX) && !it.name.endsWith(GAME_WORLD_SUFFIX) }
         .associateBy { it.name.drop(WORLD_PREFIX.length) }
 val arenaGames = mutableListOf<ArenaGame>()
+
+private val WORLD_CREATOR = WorldCreator("")
+    .generateStructures(false)
+    .generator(object : ChunkGenerator() {
+        override fun generateChunkData(
+            world: World,
+            random: Random,
+            x: Int,
+            z: Int,
+            biome: BiomeGrid
+        ): ChunkData = createChunkData(world)
+    })
 
 /**
  * a base [World] to be copied by each [ArenaGame]
@@ -34,21 +47,10 @@ object ArenaWorld {
      * create arena world from [name]
      */
     fun create(name: String) {
+        // todo since copying and loading is faster than creating, only create 1 empty world and then copy from it for both base worlds AND game worlds
         val worldName = "$WORLD_PREFIX$name"
         time("world $worldName creation") {
-            val generator = object : ChunkGenerator() {
-                override fun generateChunkData(
-                    world: World,
-                    random: Random,
-                    x: Int,
-                    z: Int,
-                    biome: BiomeGrid
-                ): ChunkData = createChunkData(world)
-            }
-            val world = WorldCreator(worldName)
-                .generator(generator)
-                .generateStructures(false)
-                .createWorld()!!
+            val world = WorldCreator(worldName).copy(WORLD_CREATOR).createWorld()!!
             world.keepSpawnInMemory = false
             // we'll save the world manually on game creation and it saves itself on server close
             world.isAutoSave = false
@@ -59,8 +61,9 @@ object ArenaWorld {
      * delete arena [world]
      */
     fun delete(world: World) {
+        world.players.forEach { Command.lobby(it) }
+
         time("world ${world.name} removal") {
-            world.players.forEach { Command.lobby(it) }
             Bukkit.unloadWorld(world, false)
             world.worldFolder.deleteRecursively()
         }
@@ -81,7 +84,7 @@ class ArenaGame : Listener {
 
     private val id = generateId()
 
-    private val worldName = "$WORLD_PREFIX$name$id"
+    private val worldName = "$WORLD_PREFIX$name$id$GAME_WORLD_SUFFIX"
     lateinit var world: World
 
     private val players get() = server.onlinePlayers.filter { it.world == world }
@@ -99,7 +102,7 @@ class ArenaGame : Listener {
                 // deleting this ensures the server doesnt prevent loading this duplicated world
                 gameWorldFolder["uid.dat"].delete()
 
-                world = WorldCreator(worldName).createWorld()!!
+                world = WorldCreator(worldName).copy(WORLD_CREATOR).createWorld()!!
                 world.keepSpawnInMemory = false
                 world.isAutoSave = false
             }

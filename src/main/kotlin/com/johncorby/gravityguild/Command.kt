@@ -55,10 +55,11 @@ object Command : BaseCommand() {
     fun createArena(sender: CommandSender, name: String) {
         if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
 
+        if (!name.matches("""[a-z0-9/._-]+""".toRegex())) throw InvalidCommandArgument("name $name has invalid character")
         ArenaWorld.create(name)
         sender.info("arena $name created")
 
-        editArena(sender as Player, name)
+        (sender as? Player)?.let { editArena(it, name) }
     }
 
     @Subcommand("arena delete")
@@ -94,6 +95,7 @@ object Command : BaseCommand() {
         sender.info("joining arena")
         arenaGames
             .filter { it.numPlayers != Options.maxPlayers }
+            .shuffled()
             .maxBy { it.numPlayers }
             .run { this ?: ArenaGame() }
             .run { sender.teleport(world.spawnLocation) }

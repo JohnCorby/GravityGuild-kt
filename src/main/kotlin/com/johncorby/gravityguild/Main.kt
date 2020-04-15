@@ -2,7 +2,6 @@ package com.johncorby.gravityguild
 
 import com.johncorby.gravityguild.arena.Listener
 import com.johncorby.gravityguild.arena.arenaGames
-import com.johncorby.gravityguild.arena.arenaWorlds
 import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var PLUGIN: Main
