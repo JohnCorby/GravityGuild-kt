@@ -17,10 +17,6 @@ object Command : BaseCommand() {
 
             // arena
             commandCompletions.registerCompletion("arenaWorld") { c -> arenaWorlds.keys.filter { it.startsWith(c.input) } }
-//            commandContexts.registerContext(World::class.java) { c ->
-//                val name = c.popFirstArg()
-//                arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
-//            }
 
             commandConditions.addCondition("lobby") { c ->
                 if (Data.lobby == null) throw ConditionFailedException("you need to set a lobby first")

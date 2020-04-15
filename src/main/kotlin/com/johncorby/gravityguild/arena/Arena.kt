@@ -11,7 +11,6 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.generator.ChunkGenerator
-import java.io.File
 import java.util.*
 
 /**
@@ -51,8 +50,8 @@ object ArenaWorld {
                 .generateStructures(false)
                 .createWorld()!!
             world.keepSpawnInMemory = false
-            // for some reason it doesnt appear to save on world creation?
-            world.save()
+            // we'll save the world manually on game creation and it saves itself on server close
+            world.isAutoSave = false
         }
     }
 
@@ -61,7 +60,7 @@ object ArenaWorld {
      */
     fun delete(world: World) {
         time("world ${world.name} removal") {
-            // todo save option seems to do nothing, it takes just as long either way, see https://www.spigotmc.org/threads/loading-worlds-async-with-no-lag.268731/
+            world.players.forEach { Command.lobby(it) }
             Bukkit.unloadWorld(world, false)
             world.worldFolder.deleteRecursively()
         }
@@ -91,17 +90,20 @@ class ArenaGame : Listener {
     init {
         // copy/load base world
         time("world $worldName creation") {
-            val baseWorldFolder = arenaWorlds[name]!!.worldFolder
-            val gameWorldFolder = server.worldContainer[worldName]
-            baseWorldFolder.copyRecursively(gameWorldFolder, true)
-            // deleting this ensures the server doesnt prevent loading this duplicated world
-            gameWorldFolder["uid.dat"].delete()
+            arenaWorlds[name]!!.let { baseWorld ->
+                baseWorld.save()
 
-            world = WorldCreator(worldName).createWorld()!!
-            world.keepSpawnInMemory = false
-            world.isAutoSave = false
+                val baseWorldFolder = baseWorld.worldFolder
+                val gameWorldFolder = server.worldContainer[worldName]
+                baseWorldFolder.copyRecursively(gameWorldFolder, true)
+                // deleting this ensures the server doesnt prevent loading this duplicated world
+                gameWorldFolder["uid.dat"].delete()
+
+                world = WorldCreator(worldName).createWorld()!!
+                world.keepSpawnInMemory = false
+                world.isAutoSave = false
+            }
         }
-
         arenaGames.add(this)
     }
 
