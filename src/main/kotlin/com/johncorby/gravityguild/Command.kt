@@ -55,8 +55,7 @@ object Command : BaseCommand() {
     fun createArena(sender: CommandSender, name: String) {
         if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
 
-        if (!name.matches("""[a-z0-9/._-]+""".toRegex())) throw InvalidCommandArgument("name $name has invalid character")
-        ArenaWorld.create(name)
+        WorldHelper.createOrLoad("$name$BASE_WORLD_SUFFIX")
         sender.info("arena $name created")
 
         (sender as? Player)?.let { editArena(it, name) }
@@ -69,7 +68,7 @@ object Command : BaseCommand() {
     fun deleteArena(sender: CommandSender, name: String) {
         val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
-        ArenaWorld.delete(arenaWorld)
+        WorldHelper.delete(arenaWorld.name)
         sender.info("arena $name deleted")
     }
 
