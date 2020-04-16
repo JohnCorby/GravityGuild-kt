@@ -85,6 +85,15 @@ object Command : BaseCommand() {
         sender.teleport(arenaWorld.spawnLocation)
     }
 
+    @Subcommand("arena list")
+    @Description("lists arenas")
+    @CommandPermission(ADMIN_PERM)
+    fun listArena(sender: CommandSender) {
+        sender.info("arenas: " + arenaWorlds.keys.joinToString { name ->
+            name + arenaGames.filter { it.name == name }.map { it.id }.ifEmpty { "" }
+        })
+    }
+
     @Subcommand("arena join")
     @Description("join an arena")
     @Conditions("lobby")

@@ -1,19 +1,18 @@
 package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
+import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
 import com.johncorby.gravityguild.PLUGIN
 import com.johncorby.gravityguild.info
 import com.johncorby.gravityguild.warn
 import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.schedule
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.entity.WitherSkull
 import org.bukkit.event.Event
 import org.bukkit.event.block.Action
-import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.entity.ProjectileHitEvent
-import org.bukkit.event.entity.ProjectileLaunchEvent
+import org.bukkit.event.entity.*
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -42,11 +41,12 @@ object Listener {
 
         listen<ProjectileLaunchEvent> {
             if (entityType != EntityType.ARROW) return@listen
+            if (entity !is Player) return@listen
             if (!entity.inArena) return@listen
 
             // no gravity
             entity.setGravity(false)
-            // todo preserve velocity because for some reason it slows down over time
+            // fixme preserve velocity because for some reason it slows down over time
         }
         listen<ProjectileCollideEvent> {
             if (entityType != EntityType.ARROW) return@listen
@@ -66,21 +66,38 @@ object Listener {
 
 
         listen<PlayerInteractEvent> {
+            if (action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) return@listen
             if (!player.inArena) return@listen
-            if (action !in arrayOf(Action.LEFT_CLICK_BLOCK, Action.LEFT_CLICK_AIR)) return@listen
 
             // shoot skull
             player.launchProjectile(WitherSkull::class.java, player.location.direction)
             // cancel so player doesnt break anything
             isCancelled = true
         }
-        listen<PlayerDeathEvent> {
-            // todo this doesnt actually work. it shows you the death screen but also resets your health bruh
+        listen<EntityDamageEvent> {
+            if (entity !is Player) return@listen
             if (!entity.inArena) return@listen
 
-            // reset damage instead of cancelling so hit animation still plays
-            entity.health = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+            // if non-lethal, dont take damage (but still do animation/knockback)
+            if ((entity as Player).health - damage > 0) damage = 0.0
+        }
+        listen<PlayerDeathEvent> {
+            if (!entity.inArena) return@listen
+
+            entity.info("get fucked pussy boy")
+            entity.info("here's how you died: $deathMessage")
+            entity.info("ill make arena broadcasting at some point")
+            isCancelled = true
             // todo message, life, respawn/kick, etc
+        }
+
+        listen<FoodLevelChangeEvent> {
+            if (!entity.inArena) return@listen
+            isCancelled = true
+        }
+        listen<PlayerPickupExperienceEvent> {
+            if (!player.inArena) return@listen
+            isCancelled = true
         }
     }
 

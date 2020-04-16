@@ -9,7 +9,7 @@ import java.util.*
 /**
  * return [ArenaGame] that [Entity] is in
  */
-val Entity.arenaIn get() = arenaGames.find { world.name == it.worldName }
+val Entity.arenaIn get() = arenaGames.find { world == it.world }
 inline val Entity.inArena get() = arenaIn != null
 
 const val BASE_WORLD_SUFFIX = "_gg_base"
@@ -25,7 +25,7 @@ val arenaGames = mutableListOf<ArenaGame>()
  * instance of [ArenaWorld] where the actual games are held
  */
 class ArenaGame : Listener {
-    private val name = arenaWorlds.keys.random()
+    val name = arenaWorlds.keys.random()
 
     private fun generateId(): Int = arenaGames.map { it.id }.let { ids ->
         var newId = 0
@@ -33,7 +33,7 @@ class ArenaGame : Listener {
         newId
     }
 
-    private val id = generateId()
+    val id = generateId()
 
     val worldName = "$name$id$GAME_WORLD_SUFFIX"
     inline val world get() = WorldHelper.getWorld(worldName)
@@ -67,7 +67,7 @@ class ArenaGame : Listener {
         // todo stop cooldowns
 
         // close game if only one player left
-        // todo probably wont call close twice if onLeave was called when closing game and kicking players out
+        // fixme probably wont call close twice if onLeave was called when closing game and kicking players out
         if (numPlayers <= 1) close()
     }
 

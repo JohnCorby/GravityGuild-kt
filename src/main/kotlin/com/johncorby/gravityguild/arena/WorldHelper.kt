@@ -32,7 +32,7 @@ object WorldHelper {
      */
     fun createOrLoad(name: String) {
         // todo since copying and loading is faster than creating, only create 1 empty world and then copy from it for both base worlds AND game worlds
-        time("world $name create/world") {
+        time("world $name create/load") {
             require(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
 
             val world = WorldCreator(name).copy(creator).createWorld()!!
@@ -57,7 +57,7 @@ object WorldHelper {
     /**
      * copies world [from] to world [to] and loads that copy
      */
-    fun copy(from: String, to: String) {
+    inline fun copy(from: String, to: String) {
         time("world copy from $from to $to") {
             val fromWorld = getWorld(from)
             fromWorld.save()
@@ -65,7 +65,7 @@ object WorldHelper {
             val fromWorldFolder = fromWorld.worldFolder
             val toWorldFolder = server.worldContainer[to]
 
-            // todo sometimes does this: java.io.IOException: Source file wasn't copied completely, length of destination file differs.
+            // fixme sometimes throws java.io.IOException: Source file wasn't copied completely, length of destination file differs.
             fromWorldFolder.copyRecursively(toWorldFolder, true)
             // deleting this ensures the server doesnt prevent loading this duplicated world
             toWorldFolder["uid.dat"].delete()
