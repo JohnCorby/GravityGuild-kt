@@ -2,13 +2,9 @@ package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Options
 import hazae41.minecraft.kutils.bukkit.server
-import org.bukkit.Material
-import org.bukkit.attribute.Attribute
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemStack
 import java.util.*
 
 /**

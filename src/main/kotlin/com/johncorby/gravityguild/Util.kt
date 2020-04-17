@@ -33,6 +33,6 @@ fun time(what: String, block: () -> Unit) =
     (measureTimeMillis(block) / 50f).also { debug("$what took $it ticks") }
 
 /**
- * formats a number with a unit that is either singular or plural depending on the number
+ * returns [value] and a unit that is [singular] or [plural] depending on [value]
  */
 fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"

@@ -41,19 +41,20 @@ fun Player.initForArena() {
 //    isInvincible = true
 }
 
-inline var Player.lives
+var Player.lives
     get() = level
     set(value) {
+        require(value >= 0) { "lives cannot be negative" }
         level = value
         exp = value / Options.lives.toFloat()
     }
-inline var Player.isInvincible
+var Player.isInvincible
     get() = isInvulnerable && isGlowing
     set(value) {
         isInvulnerable = value
         isGlowing = value
     }
-inline var Player.isSpectator
+var Player.isSpectator
     get() = gameMode == GameMode.SPECTATOR
     set(value) {
         gameMode = if (value) GameMode.SPECTATOR else GameMode.SURVIVAL

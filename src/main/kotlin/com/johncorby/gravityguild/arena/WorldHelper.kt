@@ -4,6 +4,7 @@ import com.johncorby.gravityguild.Command
 import com.johncorby.gravityguild.time
 import hazae41.minecraft.kutils.bukkit.server
 import hazae41.minecraft.kutils.get
+import org.bukkit.GameRule
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.generator.ChunkGenerator
@@ -35,9 +36,10 @@ object WorldHelper {
         time("world $name create/load") {
             require(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
 
-            val world = WorldCreator(name).copy(creator).createWorld()!!
-            world.keepSpawnInMemory = false
-            world.isAutoSave = false
+            WorldCreator(name).copy(creator).createWorld()!!.apply {
+                keepSpawnInMemory = false
+                isAutoSave = false
+            }
         }
     }
 
@@ -46,11 +48,12 @@ object WorldHelper {
      */
     fun delete(name: String) {
         time("world $name delete") {
-            val world = getWorld(name)
-            world.players.forEach { Command.lobby(it) }
+            getWorld(name).apply {
+                players.forEach { Command.lobby(it) }
 
-            server.unloadWorld(world, false)
-            world.worldFolder.deleteRecursively()
+                server.unloadWorld(this, false)
+                worldFolder.deleteRecursively()
+            }
         }
     }
 

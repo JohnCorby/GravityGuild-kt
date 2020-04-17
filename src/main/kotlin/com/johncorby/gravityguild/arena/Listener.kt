@@ -14,6 +14,7 @@ import org.bukkit.entity.WitherSkull
 import org.bukkit.event.Event
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.*
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -42,7 +43,7 @@ object Listener {
 
         listen<ProjectileLaunchEvent> {
             if (entityType != EntityType.ARROW) return@listen
-            if (entity !is Player) return@listen
+            if (entity.shooter !is Player) return@listen
             if (!entity.inArena) return@listen
 
             // no gravity
@@ -50,7 +51,8 @@ object Listener {
             // fixme preserve velocity because for some reason it slows down over time
         }
         listen<ProjectileCollideEvent> {
-            if (entityType != EntityType.ARROW) return@listen
+//            if (entityType != EntityType.ARROW) return@listen
+            if (entity.shooter !is Player) return@listen
             if (!entity.inArena) return@listen
 
             // make it so players cant shoot themselves
@@ -58,14 +60,15 @@ object Listener {
         }
         listen<ProjectileHitEvent> {
             if (!entity.inArena) return@listen
+            if (entity.shooter !is Player) return@listen
             when (entityType) {
                 EntityType.ARROW -> {
-                    (hitEntity as? Player)?.damage(9999.0, hitEntity)
+                    (hitEntity as? Player)?.damage(Double.MAX_VALUE, hitEntity)
                     entity.remove()
                 }
                 EntityType.SNOWBALL -> {
                     // death snowball
-                    (hitEntity as? Player)?.damage(9999.0, hitEntity)
+                    (hitEntity as? Player)?.damage(Double.MAX_VALUE, hitEntity)
                     entity.world.strikeLightningEffect(entity.location)
                 }
             }
@@ -85,21 +88,19 @@ object Listener {
             if (entity !is Player) return@listen
             if (!entity.inArena) return@listen
 
-            // if non-lethal, dont take damage (but still do animation/knockback)
-            if ((entity as Player).health - damage > 0 && cause in arrayOf<EntityDamageEvent.DamageCause>(
-                    EntityDamageEvent.DamageCause.FALL,
-                    EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
-                )
-            ) damage = 0.0
+            if (cause !in arrayOf(DamageCause.FALL, DamageCause.ENTITY_EXPLOSION)) return@listen
+            if ((entity as Player).health - damage <= 0) return@listen
+            damage = 0.0
         }
         listen<PlayerDeathEvent> {
             entity.arenaIn?.let { game ->
                 isCancelled = true
 
-                entity.lives--
+                keepInventory = true
+                keepLevel = true
 
                 game.broadcast(deathMessage!!)
-                game.broadcast("${entity.name} has ${unitize(entity.lives, "life", "lives")} remaining")
+                game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
 
                 // todo respawn/kick
                 entity.initForArena()
