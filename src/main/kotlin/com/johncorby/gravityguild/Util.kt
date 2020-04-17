@@ -1,6 +1,5 @@
 package com.johncorby.gravityguild
 
-import hazae41.minecraft.kutils.bukkit.schedule
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.system.measureTimeMillis
 
@@ -27,9 +26,13 @@ private typealias Suspendable = SequenceScope<Any?>
 suspend fun Suspendable.suspend() = yield(null)
 
 
-
 /**
  * run [block] and print how long it took
  */
 fun time(what: String, block: () -> Unit) =
     (measureTimeMillis(block) / 50f).also { debug("$what took $it ticks") }
+
+/**
+ * formats a number with a unit that is either singular or plural depending on the number
+ */
+fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"

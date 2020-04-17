@@ -78,7 +78,7 @@ object Command : BaseCommand() {
     @CommandCompletion("@arenaWorld")
     @Conditions("lobby")
     fun editArena(sender: Player, name: String) {
-        // todo get rid of this and instead rely on inventory manager and world manager?????
+        // fixme somehow make sure there is an inventory manager
         val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
         sender.info("teleporting to $name base world")

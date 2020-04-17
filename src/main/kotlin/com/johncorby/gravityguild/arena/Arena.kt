@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.gravityguild.Options
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -63,35 +64,8 @@ class ArenaGame : Listener {
         // todo start cooldown
         //  cooldown can be started any time and ended either after a certain period of time or on command (including during the certain period of time)
 
-        // fixme make this happen on death as well
-        // Set experience to lives
-        level = 10
-        exp = 0f
-
-        // heal
-        health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
-        foodLevel = 20
-        fireTicks = 0
-        activePotionEffects.forEach { removePotionEffect(it.type) }
-
-        // init inventory
-        inventory.apply {
-            clear()
-            addItem(
-                ItemStack(Material.BOW).apply {
-                    addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
-                    addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
-                },
-                ItemStack(Material.ARROW)
-            )
-            helmet = ItemStack(Material.END_ROD).apply {
-                addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1)
-            }
-            chestplate = ItemStack(Material.ELYTRA).apply {
-                addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1)
-                addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
-            }
-        }
+        lives = Options.lives
+        initForArena()
     }
 
     /**
@@ -103,6 +77,8 @@ class ArenaGame : Listener {
         // close game if only one player left
         // fixme probably wont call close twice if onLeave was called when closing game and kicking players out
         if (numPlayers <= 1) close()
+
+        isInvincible = false
     }
 
     override fun equals(other: Any?) = (other as? ArenaGame)?.let {

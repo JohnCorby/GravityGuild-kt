@@ -3,7 +3,8 @@ package com.johncorby.gravityguild.arena
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
 import com.johncorby.gravityguild.PLUGIN
-import com.johncorby.gravityguild.info
+import com.johncorby.gravityguild.broadcast
+import com.johncorby.gravityguild.unitize
 import com.johncorby.gravityguild.warn
 import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.schedule
@@ -88,18 +89,21 @@ object Listener {
             if ((entity as Player).health - damage > 0 && cause in arrayOf<EntityDamageEvent.DamageCause>(
                     EntityDamageEvent.DamageCause.FALL,
                     EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
-                )) damage = 0.0
+                )
+            ) damage = 0.0
         }
         listen<PlayerDeathEvent> {
-            if (!entity.inArena) return@listen
+            entity.arenaIn?.let { game ->
+                isCancelled = true
 
-            // todo arena broadcasting
-            entity.info("get fucked pussy boy")
-            entity.info("here's how you died: $deathMessage")
-            entity.info("ill make arena broadcasting at some point")
+                entity.lives--
 
-            isCancelled = true
-            // todo life, respawn/kick, etc
+                game.broadcast(deathMessage!!)
+                game.broadcast("${entity.name} has ${unitize(entity.lives, "life", "lives")} remaining")
+
+                // todo respawn/kick
+                entity.initForArena()
+            }
         }
 
         listen<FoodLevelChangeEvent> {

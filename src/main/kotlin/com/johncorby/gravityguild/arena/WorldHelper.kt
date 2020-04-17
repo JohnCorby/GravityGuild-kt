@@ -57,7 +57,7 @@ object WorldHelper {
     /**
      * copies world [from] to world [to] and loads that copy
      */
-    inline fun copy(from: String, to: String) {
+    fun copy(from: String, to: String) {
         time("world copy from $from to $to") {
             val fromWorld = getWorld(from)
             fromWorld.save()

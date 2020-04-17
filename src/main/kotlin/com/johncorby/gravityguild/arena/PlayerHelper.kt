@@ -1,0 +1,60 @@
+/**
+ * utils for doing cool things with players
+ */
+package com.johncorby.gravityguild.arena
+
+import com.johncorby.gravityguild.Options
+import org.bukkit.GameMode
+import org.bukkit.Material
+import org.bukkit.attribute.Attribute
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+
+
+fun Player.initForArena() {
+    // heal
+    health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+    foodLevel = 20
+    fireTicks = 0
+    activePotionEffects.forEach { removePotionEffect(it.type) }
+
+    // init inventory
+    inventory.apply {
+        clear()
+        addItem(
+            ItemStack(Material.BOW).apply {
+                addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
+                addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+            },
+            ItemStack(Material.ARROW)
+        )
+        helmet = ItemStack(Material.END_ROD).apply {
+            addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1)
+        }
+        chestplate = ItemStack(Material.ELYTRA).apply {
+            addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1)
+            addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
+        }
+    }
+
+//    isInvincible = true
+}
+
+inline var Player.lives
+    get() = level
+    set(value) {
+        level = value
+        exp = value / Options.lives.toFloat()
+    }
+inline var Player.isInvincible
+    get() = isInvulnerable && isGlowing
+    set(value) {
+        isInvulnerable = value
+        isGlowing = value
+    }
+inline var Player.isSpectator
+    get() = gameMode == GameMode.SPECTATOR
+    set(value) {
+        gameMode = if (value) GameMode.SPECTATOR else GameMode.SURVIVAL
+    }

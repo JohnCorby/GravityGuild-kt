@@ -8,6 +8,7 @@ import hazae41.minecraft.kutils.get
 object Options : PluginConfigFile("config") {
     var debug by boolean("debug")
     var maxPlayers by int("max-players")
+    var lives by int("lives")
 
     init {
         PLUGIN.init(this)

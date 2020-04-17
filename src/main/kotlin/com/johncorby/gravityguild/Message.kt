@@ -1,5 +1,7 @@
 package com.johncorby.gravityguild
 
+import com.johncorby.gravityguild.arena.ArenaGame
+import hazae41.minecraft.kutils.bukkit.Config
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 
@@ -13,8 +15,10 @@ fun CommandSender.debug(message: String) {
     if (Options.debug) send(ChatColor.GREEN, message)
 }
 
-val CONSOLE get() = PLUGIN.server.consoleSender
+inline val CONSOLE get() = PLUGIN.server.consoleSender
 fun info(message: String) = CONSOLE.info(message)
 fun warn(message: String) = CONSOLE.warn(message)
 fun error(message: String) = CONSOLE.error(message)
 fun debug(message: String) = CONSOLE.debug(message)
+
+fun ArenaGame.broadcast(message: String) = world.players.forEach { it.send(ChatColor.YELLOW, message) }
