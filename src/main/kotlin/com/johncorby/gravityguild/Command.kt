@@ -19,7 +19,7 @@ object Command : BaseCommand() {
             commandCompletions.registerCompletion("arenaWorld") { c -> arenaWorlds.keys.filter { it.startsWith(c.input) } }
 
             commandConditions.addCondition("lobby") { c ->
-                if (Data.lobby == null) throw ConditionFailedException("you need to set a lobby first")
+                Data.lobby ?: throw ConditionFailedException("you need to set a lobby first")
             }
 
             // error handler
@@ -98,7 +98,7 @@ object Command : BaseCommand() {
     @Description("join an arena")
     @Conditions("lobby")
     fun joinArena(sender: Player) {
-        if (sender.inArena) throw InvalidCommandArgument("you are already in an arena")
+        if (sender.inGame) throw InvalidCommandArgument("you are already in an arena")
         if (arenaWorlds.isEmpty()) throw InvalidCommandArgument("there are currently no arenas")
 
         // teleport to non full game with most players in it
@@ -116,7 +116,7 @@ object Command : BaseCommand() {
     @Description("leave the arena you are in")
     @Conditions("lobby")
     fun leaveArena(sender: Player) {
-        if (!sender.inArena) throw InvalidCommandArgument("you are not in an arena")
+        if (!sender.inGame) throw InvalidCommandArgument("you are not in an arena")
 
         sender.info("leaving arena")
         lobby(sender)
@@ -136,6 +136,6 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby!!)
+        sender.teleport(Data.lobby.orNullError("lobby"))
     }
 }

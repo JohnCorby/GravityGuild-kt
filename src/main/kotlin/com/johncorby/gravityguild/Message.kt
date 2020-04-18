@@ -1,7 +1,14 @@
+/**
+ * functions for sending different types of messages to players, consoles, and arenas
+ *
+ * info is a generic message
+ * warn is when something goes wrong but can still be handled
+ * error is when something goes wrong and cant be handled (exception)
+ * debug is for info that can be turned off in config
+ */
 package com.johncorby.gravityguild
 
 import com.johncorby.gravityguild.arena.ArenaGame
-import hazae41.minecraft.kutils.bukkit.Config
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 
@@ -18,7 +25,6 @@ fun CommandSender.debug(message: String) {
 inline val CONSOLE get() = PLUGIN.server.consoleSender
 fun info(message: String) = CONSOLE.info(message)
 fun warn(message: String) = CONSOLE.warn(message)
-fun error(message: String) = CONSOLE.error(message)
 fun debug(message: String) = CONSOLE.debug(message)
 
 fun ArenaGame.broadcast(message: String) = world.players.forEach { it.send(ChatColor.YELLOW, message) }

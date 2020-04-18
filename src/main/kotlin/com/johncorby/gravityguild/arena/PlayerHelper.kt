@@ -3,7 +3,9 @@
  */
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.gravityguild.BIG_NUMBER
 import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.orNullError
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -14,7 +16,7 @@ import org.bukkit.inventory.ItemStack
 
 fun Player.initForArena() {
     // heal
-    health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+    health = getAttribute(Attribute.GENERIC_MAX_HEALTH).orNullError("attribute GENERIC_MAX_HEALTH").value
     foodLevel = 20
     fireTicks = 0
     activePotionEffects.forEach { removePotionEffect(it.type) }
@@ -24,7 +26,7 @@ fun Player.initForArena() {
         clear()
         addItem(
             ItemStack(Material.BOW).apply {
-                addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
+                addUnsafeEnchantment(Enchantment.DURABILITY, BIG_NUMBER)
                 addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
             },
             ItemStack(Material.ARROW)
@@ -34,7 +36,7 @@ fun Player.initForArena() {
         }
         chestplate = ItemStack(Material.ELYTRA).apply {
             addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1)
-            addUnsafeEnchantment(Enchantment.DURABILITY, Short.MAX_VALUE.toInt())
+            addUnsafeEnchantment(Enchantment.DURABILITY, BIG_NUMBER)
         }
     }
 

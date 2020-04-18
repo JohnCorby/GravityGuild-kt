@@ -1,10 +1,11 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Command
+import com.johncorby.gravityguild.orNullError
 import com.johncorby.gravityguild.time
+import com.johncorby.gravityguild.warn
 import hazae41.minecraft.kutils.bukkit.server
 import hazae41.minecraft.kutils.get
-import org.bukkit.GameRule
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.generator.ChunkGenerator
@@ -36,10 +37,12 @@ object WorldHelper {
         time("world $name create/load") {
             require(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
 
-            WorldCreator(name).copy(creator).createWorld()!!.apply {
-                keepSpawnInMemory = false
-                isAutoSave = false
-            }
+            WorldCreator(name).copy(creator).createWorld()
+                .orNullError("createWorld for world $name")
+                .apply {
+                    keepSpawnInMemory = false
+                    isAutoSave = false
+                }
         }
     }
 
@@ -68,10 +71,14 @@ object WorldHelper {
             val fromWorldFolder = fromWorld.worldFolder
             val toWorldFolder = server.worldContainer[to]
 
-            // fixme sometimes throws java.io.IOException: Source file wasn't copied completely, length of destination file differs.
-            fromWorldFolder.copyRecursively(toWorldFolder, true)
-            // deleting this ensures the server doesnt prevent loading this duplicated world
-            toWorldFolder["uid.dat"].delete()
+            try {
+                // fixme sometimes throws java.io.IOException: Source file wasn't copied completely, length of destination file differs.
+                fromWorldFolder.copyRecursively(toWorldFolder)
+                // deleting this ensures the server doesnt prevent loading this duplicated world
+                toWorldFolder["uid.dat"].delete()
+            } catch (e: FileAlreadyExistsException) {
+                warn("world $to already exists. loading that one instead of copying from $from")
+            }
 
             createOrLoad(to)
         }

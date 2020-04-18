@@ -1,6 +1,13 @@
+/**
+ * terminology:
+ * arena name: the thing the player puts in
+ * base world: the maps that creators can edit
+ * game/game world: the object/world that people can play on
+ */
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.orNullError
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -8,10 +15,17 @@ import org.bukkit.event.Listener
 import java.util.*
 
 /**
+ * checks if [Entity] is in a game world
+ */
+val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
+
+/**
  * return [ArenaGame] that [Entity] is in
  */
-val Entity.arenaIn get() = arenaGames.find { world == it.world }
-inline val Entity.inArena get() = arenaIn != null
+val Entity.gameIn
+    get() = if (!inGame) null
+    else arenaGames.find { it.world == world }
+        ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
 const val BASE_WORLD_SUFFIX = "_gg_base"
 const val GAME_WORLD_SUFFIX = "_gg_game"
@@ -42,7 +56,7 @@ class ArenaGame : Listener {
     inline val numPlayers get() = world.playerCount
 
     init {
-        WorldHelper.copy(arenaWorlds[name]!!.name, worldName)
+        WorldHelper.copy(arenaWorlds[name].orNullError("base world for arena $name").name, worldName)
 
         arenaGames.add(this)
     }

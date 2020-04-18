@@ -4,6 +4,11 @@ import org.bukkit.scheduler.BukkitRunnable
 import kotlin.system.measureTimeMillis
 
 /**
+ * a nice big number that minecraft likes and that isnt big enough to somehow not work :)
+ */
+const val BIG_NUMBER = 9999
+
+/**
  * run [block] that you can pause for one tick with [suspend]
  *
  * @param batch how many operations (stuff between suspends) to do each run
@@ -36,3 +41,8 @@ fun time(what: String, block: () -> Unit) =
  * returns [value] and a unit that is [singular] or [plural] depending on [value]
  */
 fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"
+
+/**
+ * if [T] is null, throw an error saying so
+ */
+fun <T : Any> T?.orNullError(what: String) = this ?: error("$what is null")
