@@ -1,7 +1,7 @@
 /**
  * terminology:
- * arena name: the thing the player puts in
- * base world: the maps that creators can edit
+ * arena name: the thing the player inputs in commands
+ * map world: the maps that creators can edit
  * game/game world: the object/world that people can play on
  */
 package com.johncorby.gravityguild.arena
@@ -27,12 +27,12 @@ val Entity.gameIn
     else arenaGames.find { it.world == world }
         ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
-const val BASE_WORLD_SUFFIX = "_gg_base"
+const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
 val arenaWorlds
     get() = server.worlds
-        .filter { it.name.endsWith(BASE_WORLD_SUFFIX) }
-        .associateBy { it.name.dropLast(BASE_WORLD_SUFFIX.length) }
+        .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
+        .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
 
 val arenaGames = mutableListOf<ArenaGame>()
 
@@ -56,7 +56,7 @@ class ArenaGame : Listener {
     inline val numPlayers get() = world.playerCount
 
     init {
-        WorldHelper.copy(arenaWorlds[name].orNullError("base world for arena $name").name, worldName)
+        WorldHelper.copy(arenaWorlds[name].orNullError("map world for arena $name").name, worldName)
 
         arenaGames.add(this)
     }

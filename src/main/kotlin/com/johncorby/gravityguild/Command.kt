@@ -55,7 +55,7 @@ object Command : BaseCommand() {
     fun createArena(sender: CommandSender, name: String) {
         if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
 
-        WorldHelper.createOrLoad("$name$BASE_WORLD_SUFFIX")
+        WorldHelper.createOrLoad("$name$MAP_WORLD_SUFFIX")
         sender.info("arena $name created")
 
         (sender as? Player)?.let { editArena(it, name) }
@@ -73,7 +73,7 @@ object Command : BaseCommand() {
     }
 
     @Subcommand("arena edit")
-    @Description("teleports you to an arena world to edit it")
+    @Description("teleport to an arena world to edit it")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arenaWorld")
     @Conditions("lobby")
@@ -81,12 +81,12 @@ object Command : BaseCommand() {
         // fixme somehow make sure there is an inventory manager
         val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
-        sender.info("teleporting to $name base world")
+        sender.info("teleporting to $name map world")
         sender.teleport(arenaWorld.spawnLocation)
     }
 
     @Subcommand("arena list")
-    @Description("lists arenas")
+    @Description("list arena maps and games")
     @CommandPermission(ADMIN_PERM)
     fun listArena(sender: CommandSender) {
         sender.info("arenas: " + arenaWorlds.keys.joinToString { name ->
@@ -112,6 +112,8 @@ object Command : BaseCommand() {
             .run { sender.teleport(world.spawnLocation) }
     }
 
+    // todo force join arena
+
     @Subcommand("arena leave")
     @Description("leave the arena you are in")
     @Conditions("lobby")
@@ -124,7 +126,7 @@ object Command : BaseCommand() {
 
 
     @Subcommand("lobby set")
-    @Description("sets location for lobby")
+    @Description("set location for lobby")
     @CommandPermission(ADMIN_PERM)
     fun setLobby(sender: Player) {
         Data.lobby = sender.location
@@ -132,7 +134,7 @@ object Command : BaseCommand() {
     }
 
     @Subcommand("lobby")
-    @Description("teleports to lobby")
+    @Description("teleport to lobby")
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")

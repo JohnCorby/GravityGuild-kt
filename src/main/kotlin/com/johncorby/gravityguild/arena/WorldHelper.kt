@@ -33,7 +33,7 @@ object WorldHelper {
      * creates a world [name], or loads it if it already exists
      */
     fun createOrLoad(name: String) {
-        // todo since copying and loading is faster than creating, only create 1 empty world and then copy from it for both base worlds AND game worlds
+        // todo since copying and loading is faster than creating, only create 1 empty world and then copy from it for both map worlds AND game worlds
         time("world $name create/load") {
             require(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
 

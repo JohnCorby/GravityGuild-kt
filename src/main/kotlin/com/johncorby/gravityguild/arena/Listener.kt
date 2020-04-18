@@ -52,7 +52,7 @@ object Listener {
             if (entity.shooter !is Player) return@listen
             if (!entity.inGame) return@listen
 
-            // make it so players cant shoot themselves
+            // make it so players cant hit themselves with their own projectiles
             if (entity.shooter == collidedWith) isCancelled = true
         }
         listen<ProjectileHitEvent> {
