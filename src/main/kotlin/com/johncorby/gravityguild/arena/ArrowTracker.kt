@@ -13,10 +13,12 @@ object ArrowTracker {
 
     fun Arrow.startTracking() = tracked.put(this, velocity).also { debug("start tracking $this") }
     fun Arrow.stopTracking() = tracked.remove(this).also { debug("stop tracking $this") }
+    fun stopTrackers() = tracked.clear()
 
     init {
         schedule(period = 20) {
-
+            for ((arrow, velocity) in tracked)
+                arrow.velocity = velocity
         }
     }
 }

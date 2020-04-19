@@ -10,6 +10,7 @@ import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.entity.Snowball
 import org.bukkit.entity.WitherSkull
+import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.*
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
@@ -18,7 +19,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 
-object Listener {
+object Listener : Listener {
     init {
         listen<PlayerJoinEvent> {
             player.warn("this plugin is actively in development!")
@@ -83,6 +84,8 @@ object Listener {
         }
 
 
+
+
         listen<EntityDamageEvent> {
             if (!entity.inGame) return@listen
             if (entity !is Player) return@listen
@@ -98,13 +101,15 @@ object Listener {
                 keepInventory = true
                 keepLevel = true
 
-                game.broadcast(deathMessage.orNullError("death message"))
+                game.broadcast(deathMessage!!)
                 game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
 
                 // todo respawn/kick
                 entity.initForArena()
             }
         }
+
+
 
         listen<FoodLevelChangeEvent> {
             if (entity.inGame) isCancelled = true

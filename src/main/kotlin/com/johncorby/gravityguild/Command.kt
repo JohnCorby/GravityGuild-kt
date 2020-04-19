@@ -97,54 +97,29 @@ object Command : BaseCommand() {
     @Subcommand("arena join")
     @Description("join a game")
     @Conditions("lobby")
-    fun joinArena(sender: Player) {
-        if (sender.inGame) throw InvalidCommandArgument("you are already in an arena")
-        if (arenaMaps.isEmpty()) throw InvalidCommandArgument("there are currently no arenas")
-
-        sender.info("joining arena")
-        // todo refactor
-        arenaGames
-            .filter { it.numPlayers != Options.maxPlayers } // find non-full game with the most players
-            .shuffled()
-            .maxBy { it.numPlayers }
-            .run { this ?: ArenaGame() } // or create a new one if theyre all full
-            .run { sender.teleport(world.spawnLocation) } // teleport
-    }
+    fun joinArena(sender: Player) = joinArena(sender, null, null)
 
     @Subcommand("arena join")
     @Description("join a specific game")
     @CommandPermission(ADMIN_PERM)
     @Conditions("lobby")
-    @CommandCompletion("@arenaWorld")
+    @CommandCompletion("@arenaWorld") // todo id tab completion
     fun joinArena(sender: Player, @Optional name: String?, @Optional id: Int?) {
-        when {
-            name != null -> {
-                arenaGames
-                    .filter { it.name == name } // get games matching name
-                    .ifEmpty { error("arena $name doesnt exist") }
-                    .filter { it.numPlayers != Options.maxPlayers } // find non-full one with the most players
-                    .shuffled()
-                    .maxBy { it.numPlayers }
-                    .run { this ?: ArenaGame(name) } // or create a new one if theyre all full
-                    .run { sender.teleport(world.spawnLocation) } // teleport
-            }
-            id != null -> {
-                arenaGames
-                    .find { it.name == name && it.id == id } // get game with name and id
-                    .orError("game with map $name and id $id doesnt exist")
-                    .run { sender.teleport(world.spawnLocation) } // teleport
-            }
-            else -> joinArena(sender)
-        }
+        if (sender.inGame) throw InvalidCommandArgument("you are already in a game")
+        if (arenaMaps.isEmpty()) throw InvalidCommandArgument("there are currently no maps")
+
+        val game = getGame(name, id)
+        sender.info("joining game")
+        sender.teleport(game.world.spawnLocation)
     }
 
     @Subcommand("arena leave")
     @Description("leave a game if youre in one")
     @Conditions("lobby")
     fun leaveArena(sender: Player) {
-        if (!sender.inGame) throw InvalidCommandArgument("you are not in an arena")
+        if (!sender.inGame) throw InvalidCommandArgument("you are not in a game")
 
-        sender.info("leaving arena")
+        sender.info("leaving game")
         lobby(sender)
     }
 
@@ -162,6 +137,6 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby.orNullError("lobby"))
+        sender.teleport(Data.lobby!!)
     }
 }

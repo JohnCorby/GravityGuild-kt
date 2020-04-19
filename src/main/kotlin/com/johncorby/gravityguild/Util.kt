@@ -1,9 +1,10 @@
 package com.johncorby.gravityguild
 
-import hazae41.minecraft.kutils.bukkit.listen
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
+import org.bukkit.event.HandlerList
+import org.bukkit.event.Listener
 import org.bukkit.scheduler.BukkitTask
 import kotlin.system.measureTimeMillis
 
@@ -12,23 +13,46 @@ import kotlin.system.measureTimeMillis
  */
 const val BIG_NUMBER = 9999
 
+
 /**
- * slightly better version of the hazae41 one (uses this instead of it)
+ * create a new [Listener] object
  */
-inline fun <reified T : Event> listen(
+fun newListener() = object : Listener {}
+
+/**
+ * listen for an event with this [Listener]
+ *
+ * modified from the hazae41 one
+ */
+inline fun <reified T : Event> Listener.listen(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
     crossinline callback: T.() -> Unit
-) = PLUGIN.listen(priority, ignoreCancelled, callback)
+) = server.pluginManager.registerEvent(
+    T::class.java,
+    this,
+    priority,
+    { _, event -> if (event is T) event.callback() },
+    PLUGIN,
+    ignoreCancelled
+)
 
 /**
- * because the hazae41 one is stupid with time
+ * stop listening for all events that are listened to by this [Listener]
+ */
+fun Listener.stopListening() = HandlerList.unregisterAll(this)
+
+
+/**
+ * schedule a [BukkitTask]
+ *
+ * modified from the hazae41 one, which was stupid with time
  * todo check decompiled code to see if when is optimized away when inlining
  */
 inline fun schedule(
-    async: Boolean = false,
     delay: Long = 0,
     period: Long = 0,
+    async: Boolean = false,
     crossinline block: BukkitTask.() -> Unit
 ): BukkitTask {
     lateinit var task: BukkitTask
@@ -49,6 +73,7 @@ inline fun schedule(
     return task
 }
 
+
 /**
  * run [block] that you can pause for [period] tick/s with [suspend]
  *
@@ -68,6 +93,7 @@ fun runSuspendable(batch: Int = 1, period: Long = 1, block: suspend Suspendable.
 private typealias Suspendable = SequenceScope<Any?>
 
 suspend inline fun Suspendable.suspend() = yield(null)
+
 
 /**
  * run [block] and print how long it took

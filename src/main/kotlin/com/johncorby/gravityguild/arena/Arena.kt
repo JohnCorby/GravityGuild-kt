@@ -62,6 +62,9 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
     }
 
     fun close() {
+        // stop tracking arrows
+        ArrowTracker.stopTrackers()
+
         WorldHelper.delete(worldName)
 
         arenaGames.remove(this)
