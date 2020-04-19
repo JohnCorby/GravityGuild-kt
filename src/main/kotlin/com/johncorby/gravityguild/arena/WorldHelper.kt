@@ -36,7 +36,6 @@ object WorldHelper {
         // todo since copying and loading is faster than creating, only create 1 empty world and then copy from it for both map worlds AND game worlds
         time("world $name create/load") {
             require(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
-
             WorldCreator(name).copy(creator).createWorld()
                 .orNullError("createWorld for world $name")
                 .apply {

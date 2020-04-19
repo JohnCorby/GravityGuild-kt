@@ -8,6 +8,7 @@ package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Options
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
+import com.johncorby.gravityguild.orError
 import com.johncorby.gravityguild.orNullError
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.entity.Entity
@@ -56,7 +57,7 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
     inline val numPlayers get() = world.playerCount
 
     init {
-        WorldHelper.copy(arenaMaps[name].orNullError("map world for arena $name").name, worldName)
+        WorldHelper.copy(arenaMaps[name].orError("arena $name doesnt exist").name, worldName)
 
         arenaGames.add(this)
     }

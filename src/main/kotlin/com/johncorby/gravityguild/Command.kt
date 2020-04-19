@@ -24,10 +24,11 @@ object Command : BaseCommand() {
 
             // error handler
             setDefaultExceptionHandler { _, _, sender, _, t ->
-                sender.getIssuer<CommandSender>().apply {
-                    error("we made a fucky wucky!!! (check console for exception :3)")
-                    error("error is: $t")
-                }
+//                sender.getIssuer<CommandSender>().apply {
+//                    error("we made a fucky wucky!!! (check console for exception :3)")
+//                    error("error is: $t")
+//                }
+                sender.getIssuer<CommandSender>().error("Error: ${t.message}")
                 true
             }
 
@@ -41,7 +42,7 @@ object Command : BaseCommand() {
     }
 
     @Subcommand("reload")
-    @Description("reloads plugin (for debugging)")
+    @Description("reload plugin (for debugging)")
     @CommandPermission(ADMIN_PERM)
     fun reload(sender: CommandSender) {
         server.dispatchCommand(CONSOLE, "plugman reload ${PLUGIN.name}")
@@ -97,20 +98,31 @@ object Command : BaseCommand() {
     @Subcommand("arena join")
     @Description("join a game")
     @Conditions("lobby")
-    fun joinArena(sender: Player) = joinArena(sender, null, null)
-
-    @Subcommand("arena join")
-    @Description("join a specific game")
-    @CommandPermission(ADMIN_PERM)
-    @Conditions("lobby")
-    @CommandCompletion("@arenaWorld") // todo id tab completion
-    fun joinArena(sender: Player, @Optional name: String?, @Optional id: Int?) {
+    @CommandCompletion("@arenaWorld")
+    fun joinArena(sender: Player, @CommandPermission(ADMIN_PERM) @Optional name: String?) {
         if (sender.inGame) throw InvalidCommandArgument("you are already in a game")
         if (arenaMaps.isEmpty()) throw InvalidCommandArgument("there are currently no maps")
 
-        val game = getGame(name, id)
-        sender.info("joining game")
-        sender.teleport(game.world.spawnLocation)
+        arenaGames
+            .run {
+                // filter by name if necessary
+                if (name != null) filter { it.name == name }
+                else this
+            }.run {
+                // find non-full game with the most players
+                filter { it.numPlayers != Options.maxPlayers }
+                    .shuffled()
+                    .maxBy { it.numPlayers }
+                    .ifNull {
+                        // or create a new one if theyre all full
+                        if (name != null) ArenaGame(name)
+                        else ArenaGame()
+                    }
+            }.run {
+                // join the game
+                sender.info("joining game")
+                sender.teleport(world.spawnLocation)
+            }
     }
 
     @Subcommand("arena leave")

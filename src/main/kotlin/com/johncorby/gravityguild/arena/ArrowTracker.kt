@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.gravityguild.CONSOLE
 import com.johncorby.gravityguild.debug
 import com.johncorby.gravityguild.schedule
 import org.bukkit.entity.Arrow
@@ -11,8 +12,8 @@ import org.bukkit.util.Vector
 object ArrowTracker {
     private val tracked = mutableMapOf<Arrow, Vector>()
 
-    fun Arrow.startTracking() = tracked.put(this, velocity).also { debug("start tracking $this") }
-    fun Arrow.stopTracking() = tracked.remove(this).also { debug("stop tracking $this") }
+    fun Arrow.startTracking() = tracked.put(this, velocity).also { CONSOLE.debug("start tracking $this") }
+    fun Arrow.stopTracking() = tracked.remove(this).also { CONSOLE.debug("stop tracking $this") }
     fun stopTrackers() = tracked.clear()
 
     init {

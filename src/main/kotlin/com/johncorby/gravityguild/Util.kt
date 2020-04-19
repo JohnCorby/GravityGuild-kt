@@ -98,7 +98,7 @@ suspend inline fun Suspendable.suspend() = yield(null)
 /**
  * run [block] and print how long it took
  */
-inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 1000 / 20f)
+inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 20 / 1000f)
     .also { debug("$what took $it ticks") }
 
 /**

@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.gravityguild.CONSOLE
 import com.johncorby.gravityguild.debug
 import com.johncorby.gravityguild.schedule
 import org.bukkit.entity.Player
@@ -16,7 +17,7 @@ object CooldownTracker {
         if (this in tracked) return
         isInvincible = true
         tracked[this] = schedule(delay = DELAY * 20L) { stopCooldown() }
-        debug("start cooldown for $this")
+        CONSOLE.debug("start cooldown for $this")
     }
 
     fun Player.stopCooldown() {
@@ -24,6 +25,6 @@ object CooldownTracker {
         isInvincible = false
         tracked[this]!!.cancel()
         tracked.remove(this)
-        debug("stop cooldown for $this")
+        CONSOLE.debug("stop cooldown for $this")
     }
 }

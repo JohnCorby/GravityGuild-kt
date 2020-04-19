@@ -75,6 +75,8 @@ object Listener : Listener {
         }
         listen<PlayerInteractEvent> {
             if (!player.inGame) return@listen
+            // fixme Action.LEFT_CLICK_AIR fires when dropping items, equiping armor, and apparently sometimes placing blocks???
+            //  maybe get a pull request to try and fix that
             if (action != Action.LEFT_CLICK_BLOCK) return@listen
 
             // shoot skull
