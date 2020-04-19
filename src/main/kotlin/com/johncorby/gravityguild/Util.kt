@@ -1,6 +1,10 @@
 package com.johncorby.gravityguild
 
-import org.bukkit.scheduler.BukkitRunnable
+import hazae41.minecraft.kutils.bukkit.listen
+import hazae41.minecraft.kutils.bukkit.server
+import org.bukkit.event.Event
+import org.bukkit.event.EventPriority
+import org.bukkit.scheduler.BukkitTask
 import kotlin.system.measureTimeMillis
 
 /**
@@ -9,39 +13,77 @@ import kotlin.system.measureTimeMillis
 const val BIG_NUMBER = 9999
 
 /**
- * run [block] that you can pause for one tick with [suspend]
- *
- * @param batch how many operations (stuff between suspends) to do each run
+ * slightly better version of the hazae41 one (uses this instead of it)
  */
-fun runSuspendable(batch: Int = 1, block: suspend Suspendable.() -> Unit) {
-    val iterator = iterator(block)
+inline fun <reified T : Event> listen(
+    priority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false,
+    crossinline callback: T.() -> Unit
+) = PLUGIN.listen(priority, ignoreCancelled, callback)
 
-    object : BukkitRunnable() {
-        override fun run() {
-            repeat(batch) {
-                if (!iterator.hasNext()) return cancel()
-                iterator.next()
-            }
+/**
+ * because the hazae41 one is stupid with time
+ * todo check decompiled code to see if when is optimized away when inlining
+ */
+inline fun schedule(
+    async: Boolean = false,
+    delay: Long = 0,
+    period: Long = 0,
+    crossinline block: BukkitTask.() -> Unit
+): BukkitTask {
+    lateinit var task: BukkitTask
+    val runnable = Runnable { task.block() }
+    task = server.scheduler.run {
+        when {
+            period > 0 ->
+                if (async) runTaskTimerAsynchronously(PLUGIN, runnable, delay, period)
+                else runTaskTimer(PLUGIN, runnable, delay, period)
+            delay > 0 ->
+                if (async) runTaskLaterAsynchronously(PLUGIN, runnable, delay)
+                else runTaskLater(PLUGIN, runnable, delay)
+            else ->
+                if (async) runTaskAsynchronously(PLUGIN, runnable)
+                else runTask(PLUGIN, runnable)
         }
-    }.runTaskTimer(PLUGIN, 0, 0)
+    }
+    return task
 }
 
+/**
+ * run [block] that you can pause for [period] tick/s with [suspend]
+ *
+ * @param batch how many operations (stuff between suspends) to do each run
+ * @param period how many ticks to wait on each suspend, or how many ticks between each run of the "event loop"
+ */
+fun runSuspendable(batch: Int = 1, period: Long = 1, block: suspend Suspendable.() -> Unit) {
+    val iterator = iterator(block)
+
+    schedule(period = period) {
+        repeat(batch) {
+            if (iterator.hasNext()) iterator.next()
+            else cancel()
+        }
+    }
+}
 private typealias Suspendable = SequenceScope<Any?>
 
-suspend fun Suspendable.suspend() = yield(null)
-
+suspend inline fun Suspendable.suspend() = yield(null)
 
 /**
  * run [block] and print how long it took
  */
-fun time(what: String, block: () -> Unit) =
-    (measureTimeMillis(block) / 50f).also { debug("$what took $it ticks") }
+inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 1000 / 20f)
+    .also { debug("$what took $it ticks") }
 
 /**
  * returns [value] and a unit that is [singular] or [plural] depending on [value]
  */
 fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"
 
+/**
+ * ?: operator but in function format.
+ * good for chaining
+ */
 inline fun <T : Any> T?.ifNull(block: () -> T) = this ?: block()
 fun <T : Any> T?.orError(message: String) = ifNull { error(message) }
 fun <T : Any> T?.orNullError(what: String) = orError("$what is null")

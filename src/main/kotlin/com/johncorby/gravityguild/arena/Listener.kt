@@ -3,12 +3,13 @@ package com.johncorby.gravityguild.arena
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
 import com.johncorby.gravityguild.*
-import hazae41.minecraft.kutils.bukkit.listen
+import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
+import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
 import hazae41.minecraft.kutils.bukkit.schedule
-import org.bukkit.entity.EntityType
+import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
+import org.bukkit.entity.Snowball
 import org.bukkit.entity.WitherSkull
-import org.bukkit.event.Event
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.*
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
@@ -40,17 +41,17 @@ object Listener {
 
 
         listen<ProjectileLaunchEvent> {
-            if (entityType != EntityType.ARROW) return@listen
-            if (entity.shooter !is Player) return@listen
             if (!entity.inGame) return@listen
+            if (entity !is Arrow) return@listen
+            if (entity.shooter !is Player) return@listen
 
             // no gravity
             entity.setGravity(false)
-            // fixme preserve velocity because for some reason it slows down over time
+            (entity as Arrow).startTracking()
         }
         listen<ProjectileCollideEvent> {
-            if (entity.shooter !is Player) return@listen
             if (!entity.inGame) return@listen
+            if (entity.shooter !is Player) return@listen
 
             // make it so players cant hit themselves with their own projectiles
             if (entity.shooter == collidedWith) isCancelled = true
@@ -58,21 +59,22 @@ object Listener {
         listen<ProjectileHitEvent> {
             if (!entity.inGame) return@listen
             if (entity.shooter !is Player) return@listen
-            when (entityType) {
-                EntityType.ARROW -> {
-                    (hitEntity as? Player)?.damage(BIG_NUMBER.toDouble(), hitEntity)
+            when (entity) {
+                is Arrow -> {
+                    (hitEntity as? Player)?.damage(BIG_NUMBER.toDouble())
+                    (entity as Arrow).stopTracking()
                     entity.remove()
                 }
-                EntityType.SNOWBALL -> {
+                is Snowball -> {
                     // death snowball
-                    (hitEntity as? Player)?.damage(BIG_NUMBER.toDouble(), hitEntity)
+                    (hitEntity as? Player)?.damage(BIG_NUMBER.toDouble())
                     entity.world.strikeLightningEffect(entity.location)
                 }
             }
         }
         listen<PlayerInteractEvent> {
-            if (action != Action.LEFT_CLICK_BLOCK) return@listen
             if (!player.inGame) return@listen
+            if (action != Action.LEFT_CLICK_BLOCK) return@listen
 
             // shoot skull
             player.launchProjectile(WitherSkull::class.java, player.eyeLocation.direction)
@@ -82,8 +84,8 @@ object Listener {
 
 
         listen<EntityDamageEvent> {
-            if (entity !is Player) return@listen
             if (!entity.inGame) return@listen
+            if (entity !is Player) return@listen
 
             if (cause !in arrayOf(DamageCause.FALL, DamageCause.ENTITY_EXPLOSION)) return@listen
             if ((entity as Player).health - damage <= 0) return@listen
@@ -111,7 +113,4 @@ object Listener {
             if (player.inGame) isCancelled = true
         }
     }
-
-    private inline fun <reified T : Event> listen(crossinline callback: T.() -> Unit) =
-        PLUGIN.listen(callback = callback)
 }

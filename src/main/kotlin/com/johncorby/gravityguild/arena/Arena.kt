@@ -7,9 +7,9 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import com.johncorby.gravityguild.orNullError
 import hazae41.minecraft.kutils.bukkit.server
-import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -71,9 +71,6 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
      * called after a join occurs
      */
     fun onJoin(player: Player) = player.apply {
-        // todo start cooldown
-        //  cooldown can be started any time and ended either after a certain period of time or on command (including during the certain period of time)
-
         lives = Options.lives
         initForArena()
     }
@@ -82,13 +79,11 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
      * called after a leave occurs
      */
     fun onLeave(player: Player) = player.apply {
-        // todo stop cooldowns
+        stopCooldown()
 
         // close game if only one player left
         // fixme probably wont call close twice if onLeave was called when closing game and kicking players out
         if (numPlayers <= 1) close()
-
-        isInvincible = false
     }
 
     override fun equals(other: Any?) = (other as? ArenaGame)?.let {

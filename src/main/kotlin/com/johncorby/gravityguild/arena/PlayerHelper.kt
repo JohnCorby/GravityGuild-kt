@@ -5,6 +5,8 @@ package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.BIG_NUMBER
 import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
+import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import com.johncorby.gravityguild.orNullError
 import org.bukkit.GameMode
 import org.bukkit.Material
@@ -40,7 +42,10 @@ fun Player.initForArena() {
         }
     }
 
-//    isInvincible = true
+    // todo move to after countdown when i do that
+    // stops any possibly existing cooldown thats were already going
+    stopCooldown()
+    startCooldown()
 }
 
 var Player.lives
@@ -56,7 +61,7 @@ var Player.isInvincible
         isInvulnerable = value
         isGlowing = value
     }
-var Player.isSpectator
+var Player.isSpectating
     get() = gameMode == GameMode.SPECTATOR
     set(value) {
         gameMode = if (value) GameMode.SPECTATOR else GameMode.SURVIVAL

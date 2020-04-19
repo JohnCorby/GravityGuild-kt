@@ -6,7 +6,6 @@ repositories {
 dependencies {
     implementation 'co.aikar:acf-paper:+'
     implementation 'com.github.hazae41:mc-kutils:+'
-    implementation 'net.bytebuddy:byte-buddy:+'
 }
 
 compileKotlin {
