@@ -16,7 +16,7 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arenaWorld") { c -> arenaWorlds.keys.filter { it.startsWith(c.input) } }
+            commandCompletions.registerCompletion("arenaWorld") { c -> arenaMaps.keys.filter { it.startsWith(c.input) } }
 
             commandConditions.addCondition("lobby") { c ->
                 Data.lobby ?: throw ConditionFailedException("you need to set a lobby first")
@@ -49,11 +49,11 @@ object Command : BaseCommand() {
     }
 
 
-    @Subcommand("arena create")
-    @Description("creates an arena by name")
+    @Subcommand("arena add")
+    @Description("create an arena map by name")
     @CommandPermission(ADMIN_PERM)
-    fun createArena(sender: CommandSender, name: String) {
-        if (name in arenaWorlds) throw InvalidCommandArgument("arena $name already exists")
+    fun addArena(sender: CommandSender, name: String) {
+        if (name in arenaMaps) throw InvalidCommandArgument("arena $name already exists")
 
         WorldHelper.createOrLoad("$name$MAP_WORLD_SUFFIX")
         sender.info("arena $name created")
@@ -61,25 +61,25 @@ object Command : BaseCommand() {
         (sender as? Player)?.let { editArena(it, name) }
     }
 
-    @Subcommand("arena delete")
-    @Description("removes an arena by name")
+    @Subcommand("arena remove")
+    @Description("removes an arena map by name")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arenaWorld")
-    fun deleteArena(sender: CommandSender, name: String) {
-        val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+    fun removeArena(sender: CommandSender, name: String) {
+        val arenaWorld = arenaMaps[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
         WorldHelper.delete(arenaWorld.name)
         sender.info("arena $name deleted")
     }
 
     @Subcommand("arena edit")
-    @Description("teleport to an arena world to edit it")
+    @Description("teleport to an arena map to edit it")
     @CommandPermission(ADMIN_PERM)
     @CommandCompletion("@arenaWorld")
     @Conditions("lobby")
     fun editArena(sender: Player, name: String) {
         // fixme somehow make sure there is an inventory manager
-        val arenaWorld = arenaWorlds[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
+        val arenaWorld = arenaMaps[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
 
         sender.info("teleporting to $name map world")
         sender.teleport(arenaWorld.spawnLocation)
@@ -89,33 +89,57 @@ object Command : BaseCommand() {
     @Description("list arena maps and games")
     @CommandPermission(ADMIN_PERM)
     fun listArena(sender: CommandSender) {
-        sender.info("arenas: " + arenaWorlds.keys.joinToString { name ->
+        sender.info("arenas: " + arenaMaps.keys.joinToString { name ->
             name + arenaGames.filter { it.name == name }.map { it.id }.ifEmpty { "" }
         })
     }
 
     @Subcommand("arena join")
-    @Description("join an arena")
+    @Description("join a game")
     @Conditions("lobby")
     fun joinArena(sender: Player) {
         if (sender.inGame) throw InvalidCommandArgument("you are already in an arena")
-        if (arenaWorlds.isEmpty()) throw InvalidCommandArgument("there are currently no arenas")
+        if (arenaMaps.isEmpty()) throw InvalidCommandArgument("there are currently no arenas")
 
-        // teleport to non full game with most players in it
-        // or a new game if there is none
         sender.info("joining arena")
+        // todo refactor
         arenaGames
-            .filter { it.numPlayers != Options.maxPlayers }
+            .filter { it.numPlayers != Options.maxPlayers } // find non-full game with the most players
             .shuffled()
             .maxBy { it.numPlayers }
-            .run { this ?: ArenaGame() }
-            .run { sender.teleport(world.spawnLocation) }
+            .run { this ?: ArenaGame() } // or create a new one if theyre all full
+            .run { sender.teleport(world.spawnLocation) } // teleport
     }
 
-    // todo force join arena
+    @Subcommand("arena join")
+    @Description("join a specific game")
+    @CommandPermission(ADMIN_PERM)
+    @Conditions("lobby")
+    @CommandCompletion("@arenaWorld")
+    fun joinArena(sender: Player, @Optional name: String?, @Optional id: Int?) {
+        when {
+            name != null -> {
+                arenaGames
+                    .filter { it.name == name } // get games matching name
+                    .ifEmpty { error("arena $name doesnt exist") }
+                    .filter { it.numPlayers != Options.maxPlayers } // find non-full one with the most players
+                    .shuffled()
+                    .maxBy { it.numPlayers }
+                    .run { this ?: ArenaGame(name) } // or create a new one if theyre all full
+                    .run { sender.teleport(world.spawnLocation) } // teleport
+            }
+            id != null -> {
+                arenaGames
+                    .find { it.name == name && it.id == id } // get game with name and id
+                    .orError("game with map $name and id $id doesnt exist")
+                    .run { sender.teleport(world.spawnLocation) } // teleport
+            }
+            else -> joinArena(sender)
+        }
+    }
 
     @Subcommand("arena leave")
-    @Description("leave the arena you are in")
+    @Description("leave a game if youre in one")
     @Conditions("lobby")
     fun leaveArena(sender: Player) {
         if (!sender.inGame) throw InvalidCommandArgument("you are not in an arena")

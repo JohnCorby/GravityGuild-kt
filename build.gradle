@@ -1,13 +1,12 @@
 repositories {
     maven { url 'https://repo.aikar.co/content/groups/aikar/' }
     maven { url 'https://jitpack.io' }
-//    maven { url 'http://nexus.okkero.com/repository/maven-releases/'}
 }
 
 dependencies {
     implementation 'co.aikar:acf-paper:+'
     implementation 'com.github.hazae41:mc-kutils:+'
-//    implementation 'com.okkero.skedule:skedule:+'
+    implementation 'net.bytebuddy:byte-buddy:+'
 }
 
 compileKotlin {

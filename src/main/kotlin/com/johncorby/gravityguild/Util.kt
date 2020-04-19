@@ -42,7 +42,6 @@ fun time(what: String, block: () -> Unit) =
  */
 fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"
 
-/**
- * if [T] is null, throw an error saying so
- */
-fun <T : Any> T?.orNullError(what: String) = this ?: error("$what is null")
+inline fun <T : Any> T?.ifNull(block: () -> T) = this ?: block()
+fun <T : Any> T?.orError(message: String) = ifNull { error(message) }
+fun <T : Any> T?.orNullError(what: String) = orError("$what is null")

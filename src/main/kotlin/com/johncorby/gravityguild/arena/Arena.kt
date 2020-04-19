@@ -9,6 +9,7 @@ package com.johncorby.gravityguild.arena
 import com.johncorby.gravityguild.Options
 import com.johncorby.gravityguild.orNullError
 import hazae41.minecraft.kutils.bukkit.server
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -29,7 +30,7 @@ val Entity.gameIn
 
 const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
-val arenaWorlds
+val arenaMaps
     get() = server.worlds
         .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
         .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
@@ -39,8 +40,7 @@ val arenaGames = mutableListOf<ArenaGame>()
 /**
  * instance of [ArenaWorld] where the actual games are held
  */
-class ArenaGame : Listener {
-    val name = arenaWorlds.keys.random()
+class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
 
     private fun generateId(): Int = arenaGames.map { it.id }.let { ids ->
         var newId = 0
@@ -56,7 +56,7 @@ class ArenaGame : Listener {
     inline val numPlayers get() = world.playerCount
 
     init {
-        WorldHelper.copy(arenaWorlds[name].orNullError("map world for arena $name").name, worldName)
+        WorldHelper.copy(arenaMaps[name].orNullError("map world for arena $name").name, worldName)
 
         arenaGames.add(this)
     }
