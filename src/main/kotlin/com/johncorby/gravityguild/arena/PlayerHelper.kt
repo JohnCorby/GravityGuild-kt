@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack
 
 fun Player.initForArena() {
     // todo teleport to random part on the map
+    isSpectating = false
 
     // heal
     health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
@@ -55,14 +56,14 @@ var Player.lives
         level = value
         exp = value / Options.lives.toFloat()
     }
-var Player.isInvincible
+inline var Player.isInvincible
     get() = isInvulnerable && isGlowing
     set(value) {
         isInvulnerable = value
         // fixme glowing doesnt work??? try turning off optifine
         isGlowing = value
     }
-var Player.isSpectating
+inline var Player.isSpectating
     get() = gameMode == GameMode.SPECTATOR
     set(value) {
         gameMode = if (value) GameMode.SPECTATOR else GameMode.SURVIVAL
