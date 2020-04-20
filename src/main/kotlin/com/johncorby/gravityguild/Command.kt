@@ -1,6 +1,8 @@
 package com.johncorby.gravityguild
 
-import co.aikar.commands.*
+import co.aikar.commands.BaseCommand
+import co.aikar.commands.CommandHelp
+import co.aikar.commands.PaperCommandManager
 import co.aikar.commands.annotation.*
 import com.johncorby.gravityguild.arena.*
 import hazae41.minecraft.kutils.bukkit.server
@@ -16,19 +18,22 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arenaWorld") { c -> arenaMaps.keys.filter { it.startsWith(c.input) } }
+            commandCompletions.registerCompletion("arenaMap") { c -> maps.keys.filter { it.startsWith(c.input) } }
+            commandContexts.registerContext(Pair::class.java) { c ->
+                val name: String = c.popFirstArg()
+                name to (maps[name] ?: commandError("arena $name doesnt exist"))
+            }
 
             commandConditions.addCondition("lobby") { c ->
-                Data.lobby ?: throw ConditionFailedException("you need to set a lobby first")
+                Data.lobby ?: commandError("you need to set a lobby first")
             }
 
             // error handler
             setDefaultExceptionHandler { _, _, sender, _, t ->
-//                sender.getIssuer<CommandSender>().apply {
-//                    error("we made a fucky wucky!!! (check console for exception :3)")
-//                    error("error is: $t")
-//                }
-                sender.getIssuer<CommandSender>().error("Error: ${t.message}")
+                sender.getIssuer<CommandSender>().apply {
+                    error("we made a fucky wucky!!! (check console for exception :3)")
+                    error("error is: $t")
+                }
                 true
             }
 
@@ -54,56 +59,58 @@ object Command : BaseCommand() {
     @Description("create an arena map by name")
     @CommandPermission(ADMIN_PERM)
     fun addArena(sender: CommandSender, name: String) {
-        if (name in arenaMaps) throw InvalidCommandArgument("arena $name already exists")
+        commandRequire(name !in maps, "arena $name already exists")
 
-        WorldHelper.createOrLoad("$name$MAP_WORLD_SUFFIX")
+        val world = WorldHelper.createOrLoad("$name$MAP_WORLD_SUFFIX")
         sender.info("arena $name created")
 
-        (sender as? Player)?.let { editArena(it, name) }
+        (sender as? Player)?.let { editArena(it, name to world) }
     }
 
     @Subcommand("arena remove")
     @Description("removes an arena map by name")
     @CommandPermission(ADMIN_PERM)
-    @CommandCompletion("@arenaWorld")
-    fun removeArena(sender: CommandSender, name: String) {
-        val arenaWorld = arenaMaps[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
-
-        WorldHelper.delete(arenaWorld.name)
-        sender.info("arena $name deleted")
+    @CommandCompletion("@arenaMap")
+    fun removeArena(sender: CommandSender, map: ArenaMap) {
+        WorldHelper.delete(map.world.name)
+        sender.info("arena ${map.name} deleted")
     }
 
     @Subcommand("arena edit")
     @Description("teleport to an arena map to edit it")
     @CommandPermission(ADMIN_PERM)
-    @CommandCompletion("@arenaWorld")
+    @CommandCompletion("@arenaMap")
     @Conditions("lobby")
-    fun editArena(sender: Player, name: String) {
-        // fixme somehow make sure there is an inventory manager
-        val arenaWorld = arenaMaps[name] ?: throw InvalidCommandArgument("arena $name doesnt exist")
-
-        sender.info("teleporting to $name map world")
-        sender.teleport(arenaWorld.spawnLocation)
+    fun editArena(sender: Player, map: ArenaMap) {
+        // todo somehow make sure there is an inventory manager
+        sender.info("teleporting to ${map.name} map world")
+        sender.teleport(map.world.spawnLocation)
     }
 
     @Subcommand("arena list")
     @Description("list arena maps and games")
     @CommandPermission(ADMIN_PERM)
     fun listArena(sender: CommandSender) {
-        sender.info("arenas: " + arenaMaps.keys.joinToString { name ->
-            name + arenaGames.filter { it.name == name }.map { it.id }.ifEmpty { "" }
+        sender.info("arenas: " + maps.keys.joinToString { name ->
+            name + games.filter { it.name == name }.map { it.id }.ifEmpty { "" }
         })
     }
 
     @Subcommand("arena join")
     @Description("join a game")
     @Conditions("lobby")
-    @CommandCompletion("@arenaWorld")
-    fun joinArena(sender: Player, @CommandPermission(ADMIN_PERM) @Optional name: String?) {
-        if (sender.inGame) throw InvalidCommandArgument("you are already in a game")
-        if (arenaMaps.isEmpty()) throw InvalidCommandArgument("there are currently no maps")
+    fun joinArena(sender: Player) = joinArena(sender, null)
 
-        arenaGames
+    @Subcommand("arena joins")
+    @Description("join a specific game")
+    @CommandPermission(ADMIN_PERM)
+    @CommandCompletion("@arenaMap")
+    @Conditions("lobby")
+    fun joinArena(sender: Player, name: String?) {
+        commandRequire(!sender.inGame, "you are already in a game")
+        commandRequire(maps.isNotEmpty(), "there are currently no maps")
+
+        games
             .run {
                 // filter by name if necessary
                 if (name != null) filter { it.name == name }
@@ -113,7 +120,7 @@ object Command : BaseCommand() {
                 filter { it.numPlayers != Options.maxPlayers }
                     .shuffled()
                     .maxBy { it.numPlayers }
-                    .ifNull {
+                    ?: run {
                         // or create a new one if theyre all full
                         if (name != null) ArenaGame(name)
                         else ArenaGame()
@@ -129,7 +136,7 @@ object Command : BaseCommand() {
     @Description("leave a game if youre in one")
     @Conditions("lobby")
     fun leaveArena(sender: Player) {
-        if (!sender.inGame) throw InvalidCommandArgument("you are not in a game")
+        commandRequire(!sender.inGame, "you are not in a game")
 
         sender.info("leaving game")
         lobby(sender)

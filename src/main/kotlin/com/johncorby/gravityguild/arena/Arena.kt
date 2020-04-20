@@ -8,12 +8,11 @@ package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.Options
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
-import com.johncorby.gravityguild.orError
-import com.johncorby.gravityguild.orNullError
+import com.johncorby.gravityguild.commandError
 import hazae41.minecraft.kutils.bukkit.server
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.event.Listener
 import java.util.*
 
 /**
@@ -26,24 +25,30 @@ val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
  */
 val Entity.gameIn
     get() = if (!inGame) null
-    else arenaGames.find { it.world == world }
+    else games.find { it.world == world }
         ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
 const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
-val arenaMaps
+val maps: Map<String, World>
     get() = server.worlds
         .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
         .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
 
-val arenaGames = mutableListOf<ArenaGame>()
+val games = mutableListOf<ArenaGame>()
+
+
+typealias ArenaMap = Pair<String, World>
+
+inline val ArenaMap.name get() = first
+inline val ArenaMap.world get() = second
+
 
 /**
  * instance of [ArenaWorld] where the actual games are held
  */
-class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
-
-    private fun generateId(): Int = arenaGames.map { it.id }.let { ids ->
+class ArenaGame(val name: String = maps.keys.random()) {
+    private fun generateId(): Int = games.map { it.id }.let { ids ->
         var newId = 0
         while (newId in ids) newId++
         newId
@@ -51,16 +56,18 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
 
     val id = generateId()
 
-    val worldName = "$name$id$GAME_WORLD_SUFFIX"
-    inline val world get() = WorldHelper.getWorld(worldName)
+    private val worldName = "$name$id$GAME_WORLD_SUFFIX"
+    val world: World
 
     inline val numPlayers get() = world.playerCount
 
     init {
-        WorldHelper.copy(arenaMaps[name].orError("arena $name doesnt exist").name, worldName)
+        WorldHelper.copy((maps[name] ?: commandError("arena $name doesnt exist")).name, worldName)
+        world = WorldHelper.getWorld(worldName)
 
-        arenaGames.add(this)
+        games.add(this)
     }
+
 
     fun close() {
         // stop tracking arrows
@@ -68,7 +75,7 @@ class ArenaGame(val name: String = arenaMaps.keys.random()) : Listener {
 
         WorldHelper.delete(worldName)
 
-        arenaGames.remove(this)
+        games.remove(this)
     }
 
     /**

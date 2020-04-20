@@ -1,5 +1,6 @@
 package com.johncorby.gravityguild
 
+import co.aikar.commands.InvalidCommandArgument
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -106,10 +107,8 @@ inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 2
  */
 fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"
 
-/**
- * ?: operator but in function format.
- * good for chaining
- */
-inline fun <T : Any> T?.ifNull(block: () -> T) = this ?: block()
-fun <T : Any> T?.orError(message: String) = ifNull { error(message) }
-fun <T : Any> T?.orNullError(what: String) = orError("$what is null")
+
+fun commandError(message: Any): Nothing = throw InvalidCommandArgument(message.toString())
+fun commandRequire(value: Boolean, message: Any) {
+    if (!value) commandError(message)
+}

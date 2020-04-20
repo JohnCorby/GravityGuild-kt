@@ -15,6 +15,8 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 fun Player.initForArena() {
+    // todo teleport to random part on the map
+
     // heal
     health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
     foodLevel = 20
@@ -57,6 +59,7 @@ var Player.isInvincible
     get() = isInvulnerable && isGlowing
     set(value) {
         isInvulnerable = value
+        // fixme glowing doesnt work??? try turning off optifine
         isGlowing = value
     }
 var Player.isSpectating

@@ -1,8 +1,6 @@
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.CONSOLE
-import com.johncorby.gravityguild.debug
-import com.johncorby.gravityguild.schedule
+import com.johncorby.gravityguild.*
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
@@ -17,7 +15,7 @@ object CooldownTracker {
         if (this in tracked) return
         isInvincible = true
         tracked[this] = schedule(delay = DELAY * 20L) { stopCooldown() }
-        CONSOLE.debug("start cooldown for $this")
+        info("you are invincible and glowing for ${unitize(DELAY, "second", "seconds")}")
     }
 
     fun Player.stopCooldown() {
@@ -25,6 +23,6 @@ object CooldownTracker {
         isInvincible = false
         tracked[this]!!.cancel()
         tracked.remove(this)
-        CONSOLE.debug("stop cooldown for $this")
+        info("you are no longer invincible or glowing")
     }
 }

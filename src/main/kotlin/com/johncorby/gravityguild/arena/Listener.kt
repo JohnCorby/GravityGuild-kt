@@ -33,8 +33,8 @@ object Listener : Listener {
             if (from.world == to.world) return@listen
             // schedule 1 tick later so this happens after the teleport
             PLUGIN.schedule {
-                arenaGames.find { to.world == it.world }?.onJoin(player)
-                arenaGames.find { from.world == it.world }?.onLeave(player)
+                games.find { to.world == it.world }?.onJoin(player)
+                games.find { from.world == it.world }?.onLeave(player)
             }
         }
 
