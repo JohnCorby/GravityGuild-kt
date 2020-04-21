@@ -26,14 +26,14 @@ val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
 val Entity.gameIn
     get() = if (!inGame) null
     else games.find { it.world == world }
-        ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
+            ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
 const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
 val maps: Map<String, World>
     get() = server.worlds
-        .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
-        .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
+            .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
+            .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
 
 val games = mutableListOf<ArenaGame>()
 
@@ -46,12 +46,10 @@ inline val ArenaMap.world get() = second
 
 /**
  * instance of [ArenaWorld] where the actual games are held
- * todo arena state
  */
 class ArenaGame(val name: String = maps.keys.random()) {
-    // countdown stuff
-    private val countdownHandler = CountdownHandler(this)
-    val isRunning get() = countdownHandler.isRunning
+    private val startHandler = StartHandler(this)
+    val isJoinable = !startHandler.hasStarted && numAlivePlayers < Config.MAX_PLAYERS
 
     private fun generateId(): Int = games.map { it.id }.let { ids ->
         var newId = 0
@@ -64,7 +62,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
     private val worldName = "$name$id$GAME_WORLD_SUFFIX"
     val world: World
 
-    inline val numPlayers get() = world.playerCount
+    val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
 
     init {
         WorldHelper.copy((maps[name] ?: commandError("arena $name doesnt exist")).name, worldName)
@@ -76,9 +74,9 @@ class ArenaGame(val name: String = maps.keys.random()) {
 
     fun close() {
         // stop tracking arrows
-        ArrowTracker.stopTrackers()
+        ArrowTracker.stopTracking()
         // stop countdown
-        countdownHandler.stopCountdown()
+        startHandler.stopCountdown()
 
         WorldHelper.delete(worldName)
 
@@ -90,8 +88,9 @@ class ArenaGame(val name: String = maps.keys.random()) {
      */
     fun onJoin(player: Player) = player.apply {
         isSpectating = false
-        lives = Config.lives
+        lives = Config.LIVES
         isInvincible = true
+        // todo put players somewhere else instead of just leaving them in the map before the game starts
     }
 
     /**
@@ -102,7 +101,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
 
         // close game if only one player left
         // fixme probably wont call close twice if onLeave was called when closing game and kicking players out
-        if (numPlayers <= 1) close()
+        if (numAlivePlayers <= 1) close()
     }
 
     override fun equals(other: Any?) = (other as? ArenaGame)?.let {

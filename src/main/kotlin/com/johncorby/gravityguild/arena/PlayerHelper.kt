@@ -7,6 +7,7 @@ import com.johncorby.gravityguild.BIG_NUMBER
 import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
+import com.johncorby.gravityguild.info
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -45,7 +46,6 @@ fun Player.respawn() {
         }
     }
 
-    // todo move to after countdown when i do that
     // stops any possibly existing cooldown thats were already going
     stopCooldown()
     startCooldown()
@@ -55,8 +55,13 @@ var Player.lives
     get() = level
     set(value) {
         require(value >= 0) { "lives cannot be negative" }
+        // death
+        if (lives == 0) {
+            isSpectating = true
+            info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
+        }
         level = value
-        exp = value / Config.lives.toFloat()
+        exp = value / Config.LIVES.toFloat()
     }
 inline var Player.isInvincible
     get() = isInvulnerable && isGlowing

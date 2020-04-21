@@ -71,7 +71,6 @@ object WorldHelper {
             val toWorldFolder = server.worldContainer[to]
 
             try {
-                // fixme sometimes throws java.io.IOException: Source file wasn't copied completely, length of destination file differs.
                 fromWorldFolder.copyRecursively(toWorldFolder)
                 // deleting this ensures the server doesnt prevent loading this duplicated world
                 toWorldFolder["uid.dat"].delete()

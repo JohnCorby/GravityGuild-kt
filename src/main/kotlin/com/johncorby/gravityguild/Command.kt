@@ -117,9 +117,9 @@ object Command : BaseCommand() {
                 else this
             }.run {
                 // find non-full game with the most players
-                filter { it.numPlayers != Config.maxPlayers }
+                filter { it.isJoinable }
                     .shuffled()
-                    .maxBy { it.numPlayers }
+                    .maxBy { it.numAlivePlayers }
                     ?: run {
                         // or create a new one if theyre all full
                         if (name != null) ArenaGame(name)

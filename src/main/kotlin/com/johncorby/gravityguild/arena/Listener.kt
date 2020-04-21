@@ -104,10 +104,13 @@ object Listener : Listener {
                 keepLevel = true
 
                 game.broadcast(deathMessage!!)
-                game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
 
-                // todo respawn/kick
-                entity.respawn()
+                if (entity.lives > 0) {
+                    game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
+                    entity.respawn()
+                } else {
+                    game.broadcast("${entity.name} has ran out of lives!")
+                }
             }
         }
 
