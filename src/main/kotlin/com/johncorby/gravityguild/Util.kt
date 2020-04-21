@@ -1,6 +1,7 @@
 package com.johncorby.gravityguild
 
 import co.aikar.commands.InvalidCommandArgument
+import hazae41.minecraft.kutils.bukkit.schedule
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -48,13 +49,12 @@ fun Listener.stopListening() = HandlerList.unregisterAll(this)
  * schedule a [BukkitTask]
  *
  * modified from the hazae41 one, which was stupid with time
- * todo check decompiled code to see if when is optimized away when inlining
  */
-inline fun schedule(
+fun schedule(
     delay: Long = 0,
     period: Long = 0,
     async: Boolean = false,
-    crossinline block: BukkitTask.() -> Unit
+    block: BukkitTask.() -> Unit
 ): BukkitTask {
     lateinit var task: BukkitTask
     val runnable = Runnable { task.block() }
@@ -105,7 +105,8 @@ inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 2
 /**
  * returns [value] and a unit that is [singular] or [plural] depending on [value]
  */
-fun unitize(value: Number, singular: String, plural: String) = "$value ${if (value == 1) singular else plural}"
+fun unitize(value: Number, singular: String, plural: String = singular + 's') =
+    "$value ${if (value == 1) singular else plural}"
 
 
 fun commandError(message: Any): Nothing = throw InvalidCommandArgument(message.toString())

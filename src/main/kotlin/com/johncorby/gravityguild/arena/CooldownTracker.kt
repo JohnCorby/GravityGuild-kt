@@ -15,7 +15,7 @@ object CooldownTracker {
         if (this in tracked) return
         isInvincible = true
         tracked[this] = schedule(delay = DELAY * 20L) { stopCooldown() }
-        info("you are invincible and glowing for ${unitize(DELAY, "second", "seconds")}")
+        info("you are invincible and glowing for ${unitize(DELAY, "second")}")
     }
 
     fun Player.stopCooldown() {

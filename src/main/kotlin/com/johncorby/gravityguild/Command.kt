@@ -117,7 +117,7 @@ object Command : BaseCommand() {
                 else this
             }.run {
                 // find non-full game with the most players
-                filter { it.numPlayers != Options.maxPlayers }
+                filter { it.numPlayers != Config.maxPlayers }
                     .shuffled()
                     .maxBy { it.numPlayers }
                     ?: run {

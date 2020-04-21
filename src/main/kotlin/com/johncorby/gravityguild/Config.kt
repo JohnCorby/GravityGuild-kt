@@ -5,8 +5,9 @@ import hazae41.minecraft.kutils.bukkit.PluginConfigFile
 import hazae41.minecraft.kutils.bukkit.init
 import hazae41.minecraft.kutils.get
 
-object Options : PluginConfigFile("config") {
+object Config : PluginConfigFile("config") {
     var debug by boolean("debug")
+    var minPlayers = 2 // todo
     var maxPlayers by int("max-players")
     var lives by int("lives")
 

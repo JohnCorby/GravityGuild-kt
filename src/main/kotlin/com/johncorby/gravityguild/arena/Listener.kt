@@ -75,7 +75,7 @@ object Listener : Listener {
         }
         listen<PlayerInteractEvent> {
             if (!player.inGame) return@listen
-            // fixme Action.LEFT_CLICK_AIR fires when dropping items, equiping armor, and apparently sometimes placing blocks???
+            // fixme Action.LEFT_CLICK_AIR fires when dropping items, equipping armor, and apparently sometimes placing blocks???
             //  maybe get a pull request to try and fix that
             if (action != Action.LEFT_CLICK_BLOCK) return@listen
 
@@ -107,7 +107,7 @@ object Listener : Listener {
                 game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
 
                 // todo respawn/kick
-                entity.initForArena()
+                entity.respawn()
             }
         }
 

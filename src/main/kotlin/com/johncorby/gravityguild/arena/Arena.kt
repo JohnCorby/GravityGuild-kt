@@ -6,7 +6,7 @@
  */
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import com.johncorby.gravityguild.commandError
 import hazae41.minecraft.kutils.bukkit.server
@@ -46,8 +46,13 @@ inline val ArenaMap.world get() = second
 
 /**
  * instance of [ArenaWorld] where the actual games are held
+ * todo arena state
  */
 class ArenaGame(val name: String = maps.keys.random()) {
+    // countdown stuff
+    private val countdownHandler = CountdownHandler(this)
+    val isRunning get() = countdownHandler.isRunning
+
     private fun generateId(): Int = games.map { it.id }.let { ids ->
         var newId = 0
         while (newId in ids) newId++
@@ -72,6 +77,8 @@ class ArenaGame(val name: String = maps.keys.random()) {
     fun close() {
         // stop tracking arrows
         ArrowTracker.stopTrackers()
+        // stop countdown
+        countdownHandler.stopCountdown()
 
         WorldHelper.delete(worldName)
 
@@ -82,8 +89,9 @@ class ArenaGame(val name: String = maps.keys.random()) {
      * called after a join occurs
      */
     fun onJoin(player: Player) = player.apply {
-        lives = Options.lives
-        initForArena()
+        isSpectating = false
+        lives = Config.lives
+        isInvincible = true
     }
 
     /**

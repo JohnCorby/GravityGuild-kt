@@ -17,7 +17,7 @@ class Main : JavaPlugin() {
             .list { _, name -> name.endsWith(MAP_WORLD_SUFFIX) }
             ?.forEach { WorldHelper.createOrLoad(it) }
 
-        Options
+        Config
         Data
         Listener
         Command

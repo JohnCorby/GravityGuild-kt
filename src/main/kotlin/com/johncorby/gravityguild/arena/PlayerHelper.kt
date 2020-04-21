@@ -4,7 +4,7 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.gravityguild.BIG_NUMBER
-import com.johncorby.gravityguild.Options
+import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import org.bukkit.GameMode
@@ -14,9 +14,11 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-fun Player.initForArena() {
+/**
+ * make the player respawn in the [ArenaGame]
+ */
+fun Player.respawn() {
     // todo teleport to random part on the map
-    isSpectating = false
 
     // heal
     health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
@@ -54,7 +56,7 @@ var Player.lives
     set(value) {
         require(value >= 0) { "lives cannot be negative" }
         level = value
-        exp = value / Options.lives.toFloat()
+        exp = value / Config.lives.toFloat()
     }
 inline var Player.isInvincible
     get() = isInvulnerable && isGlowing
