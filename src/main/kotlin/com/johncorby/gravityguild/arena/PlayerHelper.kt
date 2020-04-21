@@ -45,7 +45,6 @@ fun Player.respawn() {
         }
     }
 
-    // todo move to after countdown when i do that
     // stops any possibly existing cooldown thats were already going
     stopCooldown()
     startCooldown()
@@ -55,8 +54,9 @@ var Player.lives
     get() = level
     set(value) {
         require(value >= 0) { "lives cannot be negative" }
+        if (lives == 0) isSpectating = true
         level = value
-        exp = value / Config.lives.toFloat()
+        exp = value / Config.LIVES.toFloat()
     }
 inline var Player.isInvincible
     get() = isInvulnerable && isGlowing

@@ -106,8 +106,7 @@ object Listener : Listener {
                 game.broadcast(deathMessage!!)
                 game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
 
-                // todo respawn/kick
-                entity.respawn()
+                if (entity.lives > 0) entity.respawn()
             }
         }
 

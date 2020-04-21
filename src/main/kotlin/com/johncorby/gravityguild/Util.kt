@@ -108,7 +108,9 @@ inline fun time(what: String, block: () -> Unit) = (measureTimeMillis(block) * 2
 fun unitize(value: Number, singular: String, plural: String = singular + 's') =
     "$value ${if (value == 1) singular else plural}"
 
-
+/**
+ * throws an error that wont print the stack when it is called from a command
+ */
 fun commandError(message: Any): Nothing = throw InvalidCommandArgument(message.toString())
 fun commandRequire(value: Boolean, message: Any) {
     if (!value) commandError(message)

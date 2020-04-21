@@ -14,7 +14,7 @@ object ArrowTracker {
 
     fun Arrow.startTracking() = tracked.put(this, velocity).also { CONSOLE.debug("start tracking $this") }
     fun Arrow.stopTracking() = tracked.remove(this).also { CONSOLE.debug("stop tracking $this") }
-    fun stopTrackers() = tracked.clear()
+    fun stopTracking() = tracked.clear()
 
     init {
         schedule(period = 20) {

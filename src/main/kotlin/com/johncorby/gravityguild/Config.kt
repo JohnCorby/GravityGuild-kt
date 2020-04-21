@@ -6,10 +6,10 @@ import hazae41.minecraft.kutils.bukkit.init
 import hazae41.minecraft.kutils.get
 
 object Config : PluginConfigFile("config") {
-    var debug by boolean("debug")
-    var minPlayers = 2 // todo
-    var maxPlayers by int("max-players")
-    var lives by int("lives")
+    val DEBUG by boolean("debug")
+    val MIN_PLAYERS by int("min-players")
+    val MAX_PLAYERS by int("max-players")
+    val LIVES by int("lives")
 
     init {
         PLUGIN.init(this)
