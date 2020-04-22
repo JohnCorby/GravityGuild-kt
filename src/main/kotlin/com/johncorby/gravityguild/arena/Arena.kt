@@ -62,6 +62,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
     private val worldName = "$name$id$GAME_WORLD_SUFFIX"
     val world: World
 
+    // fixme npe?!?!?!???!?!?!?!
     val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
 
     init {
@@ -70,7 +71,6 @@ class ArenaGame(val name: String = maps.keys.random()) {
 
         games.add(this)
     }
-
 
     fun close() {
         // stop tracking arrows
