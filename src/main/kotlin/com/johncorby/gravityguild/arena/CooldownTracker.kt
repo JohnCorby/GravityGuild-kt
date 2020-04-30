@@ -1,6 +1,8 @@
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.*
+import com.johncorby.coreapi.info
+import com.johncorby.coreapi.schedule
+import com.johncorby.coreapi.unitize
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 

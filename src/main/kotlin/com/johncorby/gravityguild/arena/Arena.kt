@@ -6,9 +6,10 @@
  */
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.coreapi.commandError
+import com.johncorby.coreapi.info
 import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
-import com.johncorby.gravityguild.commandError
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.World
 import org.bukkit.entity.Entity
@@ -26,14 +27,14 @@ val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
 val Entity.gameIn
     get() = if (!inGame) null
     else games.find { it.world == world }
-            ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
+        ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
 const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
 val maps: Map<String, World>
     get() = server.worlds
-            .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
-            .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
+        .filter { it.name.endsWith(MAP_WORLD_SUFFIX) }
+        .associateBy { it.name.dropLast(MAP_WORLD_SUFFIX.length) }
 
 val games = mutableListOf<ArenaGame>()
 
@@ -43,6 +44,9 @@ typealias ArenaMap = Pair<String, World>
 inline val ArenaMap.name get() = first
 inline val ArenaMap.world get() = second
 
+
+
+fun ArenaGame.broadcast(message: String) = world.players.forEach { info(message) }
 
 /**
  * instance of [ArenaWorld] where the actual games are held
@@ -62,7 +66,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
     private val worldName = "$name$id$GAME_WORLD_SUFFIX"
     val world: World
 
-    // fixme npe?!?!?!???!?!?!?!
+    // fixme java npe?!?!?!???!?!?!?!
     val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
 
     init {

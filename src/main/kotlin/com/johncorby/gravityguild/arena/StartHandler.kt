@@ -1,9 +1,8 @@
 package com.johncorby.gravityguild.arena
 
+import com.johncorby.coreapi.schedule
+import com.johncorby.coreapi.unitize
 import com.johncorby.gravityguild.Config
-import com.johncorby.gravityguild.broadcast
-import com.johncorby.gravityguild.schedule
-import com.johncorby.gravityguild.unitize
 
 /**
  * handles starting the [ArenaGame]

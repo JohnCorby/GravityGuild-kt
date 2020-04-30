@@ -2,7 +2,7 @@ package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
-import com.johncorby.gravityguild.*
+import com.johncorby.coreapi.*
 import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
 import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
 import hazae41.minecraft.kutils.bukkit.schedule
@@ -19,7 +19,11 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 
-object Listener : Listener {
+/**
+ * handles the listening of game-related events.
+ * this includes join/leave stuff.
+ */
+object GameListener : Listener {
     init {
         listen<PlayerJoinEvent> {
             player.warn("this plugin is actively in development!")

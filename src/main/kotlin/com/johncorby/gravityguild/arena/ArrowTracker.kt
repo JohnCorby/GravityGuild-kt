@@ -1,8 +1,8 @@
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.CONSOLE
-import com.johncorby.gravityguild.debug
-import com.johncorby.gravityguild.schedule
+import com.johncorby.coreapi.CONSOLE
+import com.johncorby.coreapi.debug
+import com.johncorby.coreapi.schedule
 import org.bukkit.entity.Arrow
 import org.bukkit.util.Vector
 

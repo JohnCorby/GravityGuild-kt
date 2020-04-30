@@ -3,11 +3,11 @@
  */
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.BIG_NUMBER
+import com.johncorby.coreapi.BIG_NUMBER
+import com.johncorby.coreapi.info
 import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
-import com.johncorby.gravityguild.info
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute

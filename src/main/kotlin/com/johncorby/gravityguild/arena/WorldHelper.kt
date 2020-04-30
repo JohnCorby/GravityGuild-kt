@@ -1,6 +1,10 @@
 package com.johncorby.gravityguild.arena
 
-import com.johncorby.gravityguild.*
+import com.johncorby.coreapi.commandError
+import com.johncorby.coreapi.commandRequire
+import com.johncorby.coreapi.time
+import com.johncorby.coreapi.warn
+import com.johncorby.gravityguild.Command
 import hazae41.minecraft.kutils.bukkit.server
 import hazae41.minecraft.kutils.get
 import org.bukkit.World

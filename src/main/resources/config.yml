@@ -1,6 +1,3 @@
-# if debug messages should print
-debug: true
-
 # the minimum number of players a game must have before it can start
 min-players: 2
 
