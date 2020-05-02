@@ -1,8 +1,0 @@
-# the minimum number of players a game must have before it can start
-min-players: 2
-
-# the maximum number of players a game can hold
-max-players: 10
-
-# how many lives players start off with when they join a game
-lives: 3

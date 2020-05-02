@@ -2,10 +2,12 @@ package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
-import com.johncorby.coreapi.*
+import com.johncorby.coreapi.BIG_NUMBER
+import com.johncorby.coreapi.listen
+import com.johncorby.coreapi.unitize
+import com.johncorby.coreapi.warn
 import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
 import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
-import hazae41.minecraft.kutils.bukkit.schedule
 import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.entity.Snowball
@@ -14,10 +16,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.*
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
+import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerTeleportEvent
 
 /**
  * handles the listening of game-related events.
@@ -33,13 +35,10 @@ object GameListener : Listener {
         }
         listen<PlayerQuitEvent> { player.gameIn?.onLeave(player) }
 
-        listen<PlayerTeleportEvent> {
-            if (from.world == to.world) return@listen
-            // schedule 1 tick later so this happens after the teleport
-            PLUGIN.schedule {
-                games.find { to.world == it.world }?.onJoin(player)
-                games.find { from.world == it.world }?.onLeave(player)
-            }
+        listen<PlayerChangedWorldEvent> {
+            val to = player.world
+            games.find { it.world == to }?.onJoin(player)
+            games.find { it.world == from }?.onLeave(player)
         }
 
 
