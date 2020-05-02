@@ -1,22 +1,17 @@
 package com.johncorby.gravityguild
 
-import com.johncorby.coreapi.PLUGIN
-import hazae41.minecraft.kutils.bukkit.ConfigFile
-import hazae41.minecraft.kutils.bukkit.PluginConfigFile
-import hazae41.minecraft.kutils.bukkit.init
-import hazae41.minecraft.kutils.get
+import com.johncorby.coreapi.ConfigFile
+import org.bukkit.Location
 
-object Config : PluginConfigFile("config") {
-    val MIN_PLAYERS by int("min-players")
-    val MAX_PLAYERS by int("max-players")
-    val LIVES by int("lives")
-
-    init {
-        PLUGIN.init(this)
-    }
+object Config : ConfigFile() {
+    val MIN_PLAYERS by Key("min-players", 2)
+    val MAX_PLAYERS by Key("max-players", 10)
+    val LIVES by Key("lives", 3)
 }
 
-object Data : ConfigFile(PLUGIN.dataFolder["data.yml"]) {
-    var lobby by location("lobby")
+internal val NULL_LOCATION = Location(null, 0.0, 0.0, 0.0)
+
+object Data : ConfigFile("data.yml") {
+    var lobby by Key("lobby", NULL_LOCATION)
 }
 

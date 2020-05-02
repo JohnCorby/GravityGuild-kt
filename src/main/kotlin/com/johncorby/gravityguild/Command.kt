@@ -26,7 +26,7 @@ object Command : BaseCommand() {
             }
 
             commandConditions.addCondition("lobby") { c ->
-                Data.lobby ?: commandError("you need to set a lobby first")
+                Data.lobby.takeUnless { it == NULL_LOCATION } ?: commandError("you need to set a lobby first")
             }
 
             // error handler
@@ -157,6 +157,6 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby!!)
+        sender.teleport(Data.lobby)
     }
 }
