@@ -19,13 +19,13 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arenaMap") { c -> maps.keys.filter { it.startsWith(c.input) } }
-            commandContexts.registerContext(Pair::class.java) { c ->
-                val name: String = c.popFirstArg()
+            commandCompletions.registerCompletion("arenaMap") { maps.search(it.input) }
+            commandContexts.registerContext(Pair::class.java) {
+                val name: String = it.popFirstArg()
                 name to (maps[name] ?: commandError("arena $name doesnt exist"))
             }
 
-            commandConditions.addCondition("lobby") { c ->
+            commandConditions.addCondition("lobby") {
                 Data.lobby.takeUnless { it == NULL_LOCATION } ?: commandError("you need to set a lobby first")
             }
 
