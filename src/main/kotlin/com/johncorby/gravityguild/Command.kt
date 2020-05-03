@@ -12,6 +12,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND
 import org.bukkit.permissions.PermissionDefault
 
+private const val PERM_DEFAULT = "gravityguild.defaults"
 private const val PERM_ADMIN = "gravityguild.admin"
 
 @CommandAlias("gravityguild|gg")
@@ -40,6 +41,7 @@ object Command : BaseCommand() {
                 true
             }
 
+            definePermission(PERM_DEFAULT, "you can do normal things", PermissionDefault.TRUE)
             definePermission(PERM_ADMIN, "You can do everything", PermissionDefault.OP)
 
             registerCommand(this@Command)
