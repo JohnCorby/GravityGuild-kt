@@ -1,11 +1,12 @@
-name: GravityGuild
 main: com.johncorby.gravityguild.Main
+name: GravityGuild
 version: 3.1-SNAPSHOT
-author: JohnCorby
-description: Minigame for my server
-softdepend: [PlugMan]
 api-version: 1.15
 
+author: JohnCorby
+description: Minigame for my server
+
+softdepend: [PlugMan]
 permissions:
   gravityguild.admin:
     description: You can do everything.
