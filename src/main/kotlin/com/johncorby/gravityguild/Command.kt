@@ -29,7 +29,7 @@ object Command : BaseCommand() {
             }
 
             commandConditions.addCondition("lobby") {
-                Data.lobby.takeUnless { it == NULL_LOCATION } ?: commandError("you need to set a lobby first")
+                Data.lobby.takeUnless { it == Data.NULL_LOCATION } ?: commandError("you need to set a lobby first")
             }
 
             // error handler

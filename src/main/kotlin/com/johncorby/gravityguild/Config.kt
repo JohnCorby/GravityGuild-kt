@@ -9,9 +9,10 @@ object Config : DelegateConfigFile() {
     val LIVES by Key("lives", 3)
 }
 
-internal val NULL_LOCATION = Location(null, 0.0, 0.0, 0.0)
 
 object Data : DelegateConfigFile("data.yml") {
+    internal val NULL_LOCATION = Location(null, 0.0, 0.0, 0.0)
+
     var lobby by Key("lobby", NULL_LOCATION)
 }
 
