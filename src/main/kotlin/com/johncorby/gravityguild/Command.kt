@@ -10,8 +10,9 @@ import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND
+import org.bukkit.permissions.PermissionDefault
 
-private const val ADMIN_PERM = "gravityguild.admin"
+private const val PERM_ADMIN = "gravityguild.admin"
 
 @CommandAlias("gravityguild|gg")
 object Command : BaseCommand() {
@@ -39,18 +40,18 @@ object Command : BaseCommand() {
                 true
             }
 
+            definePermission(PERM_ADMIN, "You can do everything", PermissionDefault.OP)
+
             registerCommand(this@Command)
         }
     }
 
     @HelpCommand
-    fun help(sender: CommandSender, help: CommandHelp) {
-        help.showHelp()
-    }
+    fun help(sender: CommandSender, help: CommandHelp) = help.showHelp()
 
     @Subcommand("reload")
     @Description("reload plugin (for debugging)")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     fun reload(sender: CommandSender) {
         server.dispatchCommand(CONSOLE, "plugman reload ${PLUGIN.name}")
         sender.info("it is done")
@@ -59,7 +60,7 @@ object Command : BaseCommand() {
 
     @Subcommand("arena add")
     @Description("create an arena map by name")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     fun addArena(sender: CommandSender, name: String) {
         commandRequire(name !in maps, "arena $name already exists")
 
@@ -71,7 +72,7 @@ object Command : BaseCommand() {
 
     @Subcommand("arena remove")
     @Description("removes an arena map by name")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     @CommandCompletion("@arenaMap")
     fun removeArena(sender: CommandSender, map: ArenaMap) {
         WorldHelper.delete(map.world.name)
@@ -80,7 +81,7 @@ object Command : BaseCommand() {
 
     @Subcommand("arena edit")
     @Description("teleport to an arena map to edit it")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     @CommandCompletion("@arenaMap")
     @Conditions("lobby")
     fun editArena(sender: Player, map: ArenaMap) {
@@ -91,7 +92,7 @@ object Command : BaseCommand() {
 
     @Subcommand("arena list")
     @Description("list arena maps and games")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     fun listArena(sender: CommandSender) {
         sender.info("arenas: " + maps.keys.joinToString { name ->
             name + games.filter { it.name == name }.map { it.id }.ifEmpty { "" }
@@ -105,7 +106,7 @@ object Command : BaseCommand() {
 
     @Subcommand("arena joins")
     @Description("join a specific game")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     @CommandCompletion("@arenaMap")
     @Conditions("lobby")
     fun joinArena(sender: Player, name: String?) {
@@ -147,7 +148,7 @@ object Command : BaseCommand() {
 
     @Subcommand("lobby set")
     @Description("set location for lobby")
-    @CommandPermission(ADMIN_PERM)
+    @CommandPermission(PERM_ADMIN)
     fun setLobby(sender: Player) {
         Data.lobby = sender.location
         sender.info("lobby set to current position/direction")

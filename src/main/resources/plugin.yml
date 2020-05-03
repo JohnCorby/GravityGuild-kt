@@ -7,7 +7,3 @@ author: JohnCorby
 description: Minigame for my server
 
 softdepend: [PlugMan]
-permissions:
-  gravityguild.admin:
-    description: You can do everything.
-    default: op
