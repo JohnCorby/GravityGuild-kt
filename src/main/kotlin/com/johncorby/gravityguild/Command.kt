@@ -9,6 +9,7 @@ import com.johncorby.gravityguild.arena.*
 import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND
 
 private const val ADMIN_PERM = "gravityguild.admin"
 
@@ -85,7 +86,7 @@ object Command : BaseCommand() {
     fun editArena(sender: Player, map: ArenaMap) {
         // todo somehow make sure there is an inventory manager
         sender.info("teleporting to ${map.name} map world")
-        sender.teleport(map.world.spawnLocation)
+        sender.teleport(map.world.spawnLocation, COMMAND)
     }
 
     @Subcommand("arena list")
@@ -129,7 +130,7 @@ object Command : BaseCommand() {
             }.run {
                 // join the game
                 sender.info("joining game")
-                sender.teleport(world.spawnLocation)
+                sender.teleport(world.spawnLocation, COMMAND)
             }
     }
 
@@ -157,6 +158,6 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby)
+        sender.teleport(Data.lobby, COMMAND)
     }
 }
