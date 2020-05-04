@@ -6,7 +6,6 @@ import co.aikar.commands.PaperCommandManager
 import co.aikar.commands.annotation.*
 import com.johncorby.coreapi.*
 import com.johncorby.gravityguild.arena.*
-import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND
@@ -50,14 +49,6 @@ object Command : BaseCommand() {
 
     @HelpCommand
     fun help(sender: CommandSender, help: CommandHelp) = help.showHelp()
-
-    @Subcommand("reload")
-    @Description("reload plugin (for debugging)")
-    @CommandPermission(PERM_ADMIN)
-    fun reload(sender: CommandSender) {
-        server.dispatchCommand(CONSOLE, "plugman reload ${PLUGIN.name}")
-        sender.info("it is done")
-    }
 
 
     @Subcommand("arena add")

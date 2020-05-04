@@ -5,5 +5,3 @@ api-version: 1.15
 
 author: JohnCorby
 description: Minigame for my server
-
-softdepend: [PlugMan]
