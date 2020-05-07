@@ -22,7 +22,7 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arenaMap") { maps.search(it.input) }
+            commandCompletions.registerCompletion("arenaMaps") { maps.search(it) }
             commandContexts.registerContext(Pair::class.java) {
                 val name: String = it.popFirstArg()
                 name to (maps[name] ?: commandError("arena $name doesnt exist"))
@@ -69,7 +69,7 @@ object Command : BaseCommand() {
     @Subcommand("arena remove")
     @Description("removes an arena map by name")
     @CommandPermission(PERM_ADMIN)
-    @CommandCompletion("@arenaMap")
+    @CommandCompletion("@arenaMaps")
     fun CommandSender.removeArena(map: ArenaMap) {
         WorldHelper.delete(map.world.name)
         info("arena ${map.name} deleted")
@@ -78,7 +78,7 @@ object Command : BaseCommand() {
     @Subcommand("arena edit")
     @Description("teleport to an arena map to edit it")
     @CommandPermission(PERM_ADMIN)
-    @CommandCompletion("@arenaMap")
+    @CommandCompletion("@arenaMaps")
     @Conditions("lobby")
     fun Player.editArena(map: ArenaMap) {
         // todo somehow make sure there is an inventory manager
@@ -103,7 +103,7 @@ object Command : BaseCommand() {
     @Subcommand("arena joins")
     @Description("join a specific game")
     @CommandPermission(PERM_ADMIN)
-    @CommandCompletion("@arenaMap")
+    @CommandCompletion("@arenaMaps")
     @Conditions("lobby")
     fun Player.joinArena(name: String?) {
         commandRequire(!inGame, "you are already in a game")
