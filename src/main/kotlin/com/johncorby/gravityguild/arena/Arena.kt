@@ -46,14 +46,13 @@ inline val ArenaMap.world get() = second
 
 
 
-fun ArenaGame.broadcast(message: String) = world.players.forEach { info(message) }
+fun ArenaGame.broadcast(message: String) = world.players.forEach { it.info(message) }
 
 /**
- * instance of [ArenaWorld] where the actual games are held
+ * instance of [ArenaMap] where the actual games are held
  */
 class ArenaGame(val name: String = maps.keys.random()) {
     private val startHandler = StartHandler(this)
-    val isJoinable = !startHandler.hasStarted && numAlivePlayers < Config.MAX_PLAYERS
 
     private fun generateId(): Int = games.map { it.id }.let { ids ->
         var newId = 0
@@ -64,17 +63,17 @@ class ArenaGame(val name: String = maps.keys.random()) {
     val id = generateId()
 
     private val worldName = "$name$id$GAME_WORLD_SUFFIX"
-    val world: World
-
-    // fixme java npe?!?!?!???!?!?!?!
-    val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
 
     init {
         WorldHelper.copy((maps[name] ?: commandError("arena $name doesnt exist")).name, worldName)
-        world = WorldHelper.getWorld(worldName)
 
         games.add(this)
     }
+
+    val world = WorldHelper.getWorld(worldName)
+
+    val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
+    val isJoinable = !startHandler.hasStarted && numAlivePlayers < Config.MAX_PLAYERS
 
     fun close() {
         // stop tracking arrows
@@ -91,8 +90,8 @@ class ArenaGame(val name: String = maps.keys.random()) {
      * called after a join occurs
      */
     fun onJoin(player: Player) = player.apply {
-        isSpectating = false
         lives = Config.LIVES
+        isSpectating = false
         isInvincible = true
         // todo put players somewhere else instead of just leaving them in the map before the game starts
     }
