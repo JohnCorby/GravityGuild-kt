@@ -67,7 +67,6 @@ inline var Player.isInvincible
     get() = isInvulnerable && isGlowing
     set(value) {
         isInvulnerable = value
-        // fixme glowing doesnt work??? try turning off optifine
         isGlowing = value
     }
 inline var Player.isSpectating
