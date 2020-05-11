@@ -56,7 +56,7 @@ var Player.lives
         level = value
         exp = value / Config.LIVES.toFloat()
     }
-inline var Player.isInvincible
+inline var Player.isCooldown
     get() = isInvulnerable && isGlowing
     set(value) {
         isInvulnerable = value

@@ -95,7 +95,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
         schedule {
             lives = Config.LIVES
             isSpectating = false
-            isInvincible = true
+            isCooldown = true
             initAndSpawn()
         }
         // todo put players somewhere else instead of just leaving them in the map before the game starts??

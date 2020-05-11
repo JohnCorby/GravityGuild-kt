@@ -16,14 +16,14 @@ object CooldownTracker {
 
     fun Player.startCooldown() {
         if (this in tracked) return
-        isInvincible = true
+        isCooldown = true
         tracked[this] = schedule(delay = DELAY * 20L) { stopCooldown() }
         info("you are invincible and glowing for ${unitize(DELAY, "second")}")
     }
 
     fun Player.stopCooldown() {
         if (this !in tracked) return
-        isInvincible = false
+        isCooldown = false
         tracked[this]!!.cancel()
         tracked.remove(this)
         info("you are no longer invincible or glowing")

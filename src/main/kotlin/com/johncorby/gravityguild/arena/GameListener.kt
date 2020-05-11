@@ -33,7 +33,6 @@ object GameListener : Listener {
             player.gameIn?.onJoin(player)
         }
         listen<PlayerQuitEvent> { player.gameIn?.onLeave(player) }
-
         listen<PlayerChangedWorldEvent> {
             val to = player.world
             games.find { it.world == to }?.onJoin(player)
@@ -109,6 +108,7 @@ object GameListener : Listener {
 
                 entity.lives--
                 if (entity.lives > 0) {
+                    // respawn
                     game.broadcast("${entity.name} has ${unitize(entity.lives, "life", "lives")} remaining")
                     entity.initAndSpawn()
                     entity.stopCooldown()
@@ -117,12 +117,16 @@ object GameListener : Listener {
                     // death
                     game.broadcast("${entity.name} has ran out of lives!")
                     entity.isSpectating = true
+                    entity.isInvulnerable = true
                     entity.info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
-                }
 
-                if (game.numAlivePlayers <= 1){
-                    // todo dont just instantly close it lol
-                    game.close()
+                    // win state
+                    if (game.numAlivePlayers <= 1) {
+                        // todo maybe refactor this to start handler?
+                        val winner = game.world.players.find { !it.isSpectating }
+                        game.broadcast("${winner?.name ?: "nobody"} has won! good job.")
+                        schedule(5 * 20L) { game.close() }
+                    }
                 }
             }
         }
