@@ -3,6 +3,7 @@ package com.johncorby.gravityguild.arena
 import com.johncorby.coreapi.info
 import com.johncorby.coreapi.schedule
 import com.johncorby.coreapi.unitize
+import com.johncorby.gravityguild.Config
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
@@ -11,7 +12,7 @@ import org.bukkit.scheduler.BukkitTask
  */
 object CooldownTracker {
     private val tracked = mutableMapOf<Player, BukkitTask>()
-    private const val DELAY = 5
+    private inline val DELAY get() = Config.COOLDOWN_TIME
 
     fun Player.startCooldown() {
         if (this in tracked) return

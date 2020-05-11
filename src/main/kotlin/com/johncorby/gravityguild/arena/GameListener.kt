@@ -2,12 +2,11 @@ package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
-import com.johncorby.coreapi.BIG_NUMBER
-import com.johncorby.coreapi.listen
-import com.johncorby.coreapi.unitize
-import com.johncorby.coreapi.warn
+import com.johncorby.coreapi.*
 import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
 import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
+import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
+import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.entity.Snowball
@@ -108,11 +107,22 @@ object GameListener : Listener {
 
                 game.broadcast(deathMessage!!)
 
+                entity.lives--
                 if (entity.lives > 0) {
-                    game.broadcast("${entity.name} has ${unitize(--entity.lives, "life", "lives")} remaining")
-                    entity.respawn()
+                    game.broadcast("${entity.name} has ${unitize(entity.lives, "life", "lives")} remaining")
+                    entity.initAndSpawn()
+                    entity.stopCooldown()
+                    entity.startCooldown()
                 } else {
+                    // death
                     game.broadcast("${entity.name} has ran out of lives!")
+                    entity.isSpectating = true
+                    entity.info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
+                }
+
+                if (game.numAlivePlayers <= 1){
+                    // todo dont just instantly close it lol
+                    game.close()
                 }
             }
         }

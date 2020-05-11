@@ -8,6 +8,7 @@ package com.johncorby.gravityguild.arena
 
 import com.johncorby.coreapi.commandError
 import com.johncorby.coreapi.info
+import com.johncorby.coreapi.schedule
 import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import hazae41.minecraft.kutils.bukkit.server
@@ -52,8 +53,6 @@ fun ArenaGame.broadcast(message: String) = world.players.forEach { it.info(messa
  * instance of [ArenaMap] where the actual games are held
  */
 class ArenaGame(val name: String = maps.keys.random()) {
-    private val startHandler = StartHandler(this)
-
     private fun generateId(): Int = games.map { it.id }.let { ids ->
         var newId = 0
         while (newId in ids) newId++
@@ -71,6 +70,8 @@ class ArenaGame(val name: String = maps.keys.random()) {
     }
 
     val world = WorldHelper.getWorld(worldName)
+
+    private val startHandler = StartHandler(this)
 
     val numAlivePlayers get() = world.players.filter { !it.isSpectating }.size
     val isJoinable = !startHandler.hasStarted && numAlivePlayers < Config.MAX_PLAYERS
@@ -90,10 +91,14 @@ class ArenaGame(val name: String = maps.keys.random()) {
      * called after a join occurs
      */
     fun onJoin(player: Player) = player.apply {
-        lives = Config.LIVES
-        isSpectating = false
-        isInvincible = true
-        // todo put players somewhere else instead of just leaving them in the map before the game starts
+        // schedule to bypass inventory manager
+        schedule {
+            lives = Config.LIVES
+            isSpectating = false
+            isInvincible = true
+            initAndSpawn()
+        }
+        // todo put players somewhere else instead of just leaving them in the map before the game starts??
     }
 
     /**

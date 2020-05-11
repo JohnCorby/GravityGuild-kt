@@ -4,9 +4,12 @@ import com.johncorby.coreapi.DelegateConfigFile
 import org.bukkit.Location
 
 object Config : DelegateConfigFile() {
-    val MIN_PLAYERS by Key("min-players", 2)
-    val MAX_PLAYERS by Key("max-players", 10)
-    val LIVES by Key("lives", 3)
+    val MIN_PLAYERS by Key("players.min", 2)
+    val MAX_PLAYERS by Key("players.max", 10)
+    val LIVES by Key("players.lives", 3)
+
+    val COUNTDOWN_INTERVALS by Key("countdown-intervals", listOf(20, 10, 5, 4, 3, 2, 1))
+    val COOLDOWN_TIME by Key("cooldown-time", 5)
 }
 
 

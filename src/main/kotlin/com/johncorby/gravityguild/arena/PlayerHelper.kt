@@ -4,10 +4,7 @@
 package com.johncorby.gravityguild.arena
 
 import com.johncorby.coreapi.BIG_NUMBER
-import com.johncorby.coreapi.info
 import com.johncorby.gravityguild.Config
-import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
-import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -16,9 +13,11 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 /**
- * make the player respawn in the [ArenaGame]
+ * initializes the player's stats and spawns them in a random location.
+ * doesnt include lives handling.
+ * doesnt start cooldown
  */
-fun Player.respawn() {
+fun Player.initAndSpawn() {
     // todo teleport to random part on the map
 
     // heal
@@ -34,6 +33,7 @@ fun Player.respawn() {
             ItemStack(Material.BOW).apply {
                 addUnsafeEnchantment(Enchantment.DURABILITY, BIG_NUMBER)
                 addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+                addUnsafeEnchantment(Enchantment.ARROW_FIRE, 1)
             },
             ItemStack(Material.ARROW)
         )
@@ -46,20 +46,13 @@ fun Player.respawn() {
         }
     }
 
-    // stops any possibly existing cooldown thats were already going
-    stopCooldown()
-    startCooldown()
 }
+
 
 var Player.lives
     get() = level
     set(value) {
-        require(value >= 0) { "lives cannot be negative" }
-        // death
-        if (lives == 0) {
-            isSpectating = true
-            info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
-        }
+        val value = value.coerceAtLeast(0)
         level = value
         exp = value / Config.LIVES.toFloat()
     }

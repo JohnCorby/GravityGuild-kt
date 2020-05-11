@@ -53,6 +53,14 @@ object Command : BaseCommand() {
     @HelpCommand
     fun help(help: CommandHelp) = help.showHelp()
 
+    @Subcommand("reload")
+    @Description("reload config files")
+    @CommandPermission(PERM_ADMIN)
+    fun CommandSender.reloadConfig() {
+        reload()
+        info("configs reloaded")
+    }
+
 
     @Subcommand("arena add")
     @Description("create an arena map by name")
