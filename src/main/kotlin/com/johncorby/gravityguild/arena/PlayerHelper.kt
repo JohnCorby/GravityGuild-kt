@@ -11,6 +11,8 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 
 /**
  * initializes the player's stats and spawns them in a random location.
@@ -25,6 +27,7 @@ fun Player.initAndSpawn() {
     foodLevel = 20
     fireTicks = 0
     activePotionEffects.forEach { removePotionEffect(it.type) }
+    addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, BIG_NUMBER * 20, 1, false,  false))
 
     // init inventory
     inventory.apply {
@@ -45,7 +48,6 @@ fun Player.initAndSpawn() {
             addUnsafeEnchantment(Enchantment.DURABILITY, BIG_NUMBER)
         }
     }
-
 }
 
 

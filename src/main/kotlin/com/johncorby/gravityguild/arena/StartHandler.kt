@@ -32,7 +32,7 @@ class StartHandler(private val game: ArenaGame) {
     private inline val DURATION get() = Config.COUNTDOWN_INTERVALS.max()!!
 
     private var countdown = DURATION
-    private var task = schedule(period = 20) {
+    private var task = schedule(period = 20) {// fixme doesnt show first number
         if (countdown in Config.COUNTDOWN_INTERVALS)
             game.broadcast("game starting in ${unitize(countdown, "second")}")
 
