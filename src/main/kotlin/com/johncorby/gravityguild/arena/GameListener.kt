@@ -3,6 +3,7 @@ package com.johncorby.gravityguild.arena
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
 import com.johncorby.coreapi.*
+import com.johncorby.gravityguild.Config
 import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
 import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
 import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
@@ -123,9 +124,9 @@ object GameListener : Listener {
                     // win state
                     if (game.numAlivePlayers <= 1) {
                         // todo maybe refactor this to start handler?
-                        val winner = game.world.players.find { !it.isSpectating }
-                        game.broadcast("${winner?.name ?: "nobody"} has won! good job.")
-                        schedule(5 * 20L) { game.close() }
+                        val winnerName = game.world.players.find { !it.isSpectating }?.name ?: "nobody"
+                        game.broadcast("$winnerName has won! good job.")
+                        schedule(Config.WIN_WAIT_TIME * 20L) { game.close() }
                     }
                 }
             }

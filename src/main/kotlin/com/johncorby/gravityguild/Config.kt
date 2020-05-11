@@ -10,6 +10,7 @@ object Config : DelegateConfigFile() {
 
     val COUNTDOWN_INTERVALS by Key("countdown-intervals", listOf(20, 10, 5, 4, 3, 2, 1))
     val COOLDOWN_TIME by Key("cooldown-time", 5)
+    val WIN_WAIT_TIME by Key("win-wait-time", 5)
 }
 
 
