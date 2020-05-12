@@ -29,7 +29,7 @@ object Command : BaseCommand() {
             }
 
             commandConditions.addCondition("lobby") {
-                Data.lobby.takeUnless { it == Data.NULL_LOCATION } ?: commandError("you need to set a lobby first")
+                Data.lobby ?: commandError("you need to set a lobby first")
             }
 
             // error handler
@@ -52,14 +52,6 @@ object Command : BaseCommand() {
 
     @HelpCommand
     fun help(help: CommandHelp) = help.showHelp()
-
-    @Subcommand("reload")
-    @Description("reload config files")
-    @CommandPermission(PERM_ADMIN)
-    fun CommandSender.reloadConfig() {
-        reload()
-        info("configs reloaded")
-    }
 
 
     @Subcommand("arena add")
@@ -163,6 +155,6 @@ object Command : BaseCommand() {
     @Conditions("lobby")
     fun lobby(sender: Player) {
         sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby, COMMAND)
+        sender.teleport(Data.lobby!!, COMMAND)
     }
 }
