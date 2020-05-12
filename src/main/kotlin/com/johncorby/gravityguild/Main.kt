@@ -2,10 +2,7 @@ package com.johncorby.gravityguild
 
 import com.johncorby.coreapi.Plugin
 import com.johncorby.coreapi.info
-import com.johncorby.gravityguild.arena.GameListener
-import com.johncorby.gravityguild.arena.MAP_WORLD_SUFFIX
-import com.johncorby.gravityguild.arena.WorldHelper
-import com.johncorby.gravityguild.arena.games
+import com.johncorby.gravityguild.arena.*
 
 class Main : Plugin() {
     override fun onEnable() {
@@ -18,6 +15,7 @@ class Main : Plugin() {
 
         Config
         Data
+        ArenaListener
         GameListener
         Command
 

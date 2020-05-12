@@ -1,48 +1,28 @@
 package com.johncorby.gravityguild.arena
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
-import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent
-import com.johncorby.coreapi.*
-import com.johncorby.gravityguild.Config
+import com.johncorby.coreapi.BIG_NUMBER
+import com.johncorby.coreapi.listen
 import com.johncorby.gravityguild.arena.ArrowTracker.startTracking
 import com.johncorby.gravityguild.arena.ArrowTracker.stopTracking
-import com.johncorby.gravityguild.arena.CooldownTracker.startCooldown
-import com.johncorby.gravityguild.arena.CooldownTracker.stopCooldown
 import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.entity.Snowball
 import org.bukkit.entity.WitherSkull
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.entity.*
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
-import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.entity.FoodLevelChangeEvent
+import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 
 /**
- * handles the listening of game-related events.
- * this includes join/leave stuff.
+ * listens to events related to the game
  */
 object GameListener : Listener {
     init {
-        listen<PlayerJoinEvent> {
-            player.warn("this plugin is actively in development!")
-            player.warn("submit any bugs you find at https://github.com/johncorby/gravityguild-kt/issues")
-
-            player.gameIn?.onJoin(player)
-        }
-        listen<PlayerQuitEvent> { player.gameIn?.onLeave(player) }
-        listen<PlayerChangedWorldEvent> {
-            val to = player.world
-            games.find { it.world == to }?.onJoin(player)
-            games.find { it.world == from }?.onLeave(player)
-        }
-
-
-
-
         listen<ProjectileLaunchEvent> {
             if (!entity.inGame) return@listen
             if (entity !is Arrow) return@listen
@@ -75,6 +55,9 @@ object GameListener : Listener {
                 }
             }
         }
+
+
+
         listen<PlayerInteractEvent> {
             if (!player.inGame) return@listen
             // fixme Action.LEFT_CLICK_AIR fires when dropping items, equipping armor, and apparently sometimes placing blocks???
@@ -104,46 +87,12 @@ object GameListener : Listener {
             if ((entity as Player).health - damage <= 0) return@listen
             damage = 0.0
         }
-        listen<PlayerDeathEvent> {
-            entity.gameIn?.let { game ->
-                isCancelled = true
 
-                keepInventory = true
-                keepLevel = true
-
-                game.broadcast(deathMessage!!)
-
-                entity.lives--
-                if (entity.lives > 0) {
-                    // respawn
-                    game.broadcast("${entity.name} has ${unitize(entity.lives, "life", "lives")} remaining")
-                    entity.initAndSpawn()
-                    entity.stopCooldown()
-                    entity.startCooldown()
-                } else {
-                    // death
-                    game.broadcast("${entity.name} has ran out of lives!")
-                    entity.isSpectating = true
-                    entity.info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
-
-                    // win state
-                    if (game.numAlivePlayers <= 1) {
-                        // todo maybe refactor this to start handler?
-                        val winnerName = game.world.players.find { !it.isSpectating }?.name ?: "nobody"
-                        game.broadcast("$winnerName has won! good job.")
-                        schedule(Config.WIN_WAIT_TIME * 20L) { game.close() }
-                    }
-                }
-            }
-        }
 
 
 
         listen<FoodLevelChangeEvent> {
             if (entity.inGame) isCancelled = true
-        }
-        listen<PlayerPickupExperienceEvent> {
-            if (player.inGame) isCancelled = true
         }
     }
 }
