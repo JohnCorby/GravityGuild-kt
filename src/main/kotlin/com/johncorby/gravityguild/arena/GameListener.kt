@@ -79,7 +79,7 @@ object GameListener : Listener {
             if (!player.inGame) return@listen
             // fixme Action.LEFT_CLICK_AIR fires when dropping items, equipping armor, and apparently sometimes placing blocks???
             //  maybe get a pull request to try and fix that
-            if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR) return@listen
+            if (action !in arrayOf(Action.LEFT_CLICK_BLOCK, Action.LEFT_CLICK_AIR)) return@listen
 
             // shoot skull
             player.launchProjectile(WitherSkull::class.java, player.eyeLocation.direction)
@@ -93,6 +93,12 @@ object GameListener : Listener {
         listen<EntityDamageEvent> {
             if (!entity.inGame) return@listen
             if (entity !is Player) return@listen
+
+            // out of world damage is usually not accounted for by invulnerability/no health gamemode
+            if (entity.isInvulnerable || (entity as Player).isSpectating) {
+                isCancelled = true
+                return@listen
+            }
 
             if (cause !in arrayOf(DamageCause.FALL, DamageCause.ENTITY_EXPLOSION)) return@listen
             if ((entity as Player).health - damage <= 0) return@listen
@@ -118,7 +124,6 @@ object GameListener : Listener {
                     // death
                     game.broadcast("${entity.name} has ran out of lives!")
                     entity.isSpectating = true
-                    entity.isInvulnerable = true // fixme this is not saved by pwi
                     entity.info("you are now spectating. leave at any time with /gg arena leave or /gg lobby")
 
                     // win state
