@@ -10,12 +10,20 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.world.WorldInitEvent
 
 /**
  * listens to events related to general arenas
  */
 object ArenaListener : Listener {
     init {
+        listen<WorldInitEvent> {
+            world.isAutoSave = false
+            world.keepSpawnInMemory = false
+        }
+
+
+
         listen<PlayerJoinEvent> {
             player.warn("this plugin is actively in development!")
             player.warn("submit any bugs you find at https://github.com/johncorby/gravityguild-kt/issues")

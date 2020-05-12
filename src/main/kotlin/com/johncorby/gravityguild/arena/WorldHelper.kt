@@ -39,10 +39,6 @@ object WorldHelper {
         time("world $name create/load") {
             commandRequire(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
             world = WorldCreator(name).copy(creator).createWorld()
-                ?.apply {
-                    keepSpawnInMemory = false
-                    isAutoSave = false
-                }
                 ?: error("creation of world $name failed")
         }
         return world
