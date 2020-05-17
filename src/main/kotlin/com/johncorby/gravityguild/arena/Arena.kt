@@ -108,7 +108,6 @@ class ArenaGame(val name: String = maps.keys.random()) {
         stopCooldown()
 
         // close game if only one player left
-        // fixme probably wont call close twice if onLeave was called when closing game and kicking players out
         if (numAlivePlayers <= 1) close()
     }
 

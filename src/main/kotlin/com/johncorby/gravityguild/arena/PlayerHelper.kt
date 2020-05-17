@@ -20,8 +20,6 @@ import org.bukkit.potion.PotionEffectType
  * doesnt start cooldown
  */
 fun Player.initAndSpawn() {
-    // todo teleport to random part on the map
-
     // heal
     health = getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
     foodLevel = 20
@@ -48,6 +46,9 @@ fun Player.initAndSpawn() {
             addUnsafeEnchantment(Enchantment.DURABILITY, BIG_NUMBER)
         }
     }
+
+    // todo teleport to random part on the map
+    
 }
 
 

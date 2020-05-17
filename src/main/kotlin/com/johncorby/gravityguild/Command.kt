@@ -82,7 +82,6 @@ object Command : BaseCommand() {
     @CommandCompletion("@arenaMaps")
     @Conditions("lobby")
     fun Player.editArena(map: ArenaMap) {
-        // todo somehow make sure there is an inventory manager
         info("teleporting to ${map.name} map world")
         teleport(map.world.spawnLocation, COMMAND)
     }
