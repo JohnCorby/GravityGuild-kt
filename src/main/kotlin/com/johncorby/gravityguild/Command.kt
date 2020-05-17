@@ -96,13 +96,11 @@ object Command : BaseCommand() {
         })
     }
 
-    @ExperimentalStdlibApi
     @Subcommand("arena join")
     @Description("join a game")
     @Conditions("lobby")
     fun Player.joinArena() = joinArena(null)
 
-    @ExperimentalStdlibApi
     @Subcommand("arena joins")
     @Description("join a specific game")
     @CommandPermission(PERM_ADMIN)
@@ -121,7 +119,7 @@ object Command : BaseCommand() {
             .filter { it.isJoinable }
             .run {
                 val max = maxBy { it.numAlivePlayers }
-                filter { it == max }.elementAtOrElse(Random.nextInt(size)) {
+                filter { it == max }.getOrElse(Random.nextInt(size)) {
                     // or create a new one if theyre all full
                     if (name != null) ArenaGame(name)
                     else ArenaGame()
