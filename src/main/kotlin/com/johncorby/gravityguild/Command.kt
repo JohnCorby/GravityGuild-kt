@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import kotlin.random.Random
 
 private const val PERM_ADMIN = "gravityguild.admin"
 private const val PERM_DEFAULT = "gravityguild.default"
@@ -95,11 +96,13 @@ object Command : BaseCommand() {
         })
     }
 
+    @ExperimentalStdlibApi
     @Subcommand("arena join")
     @Description("join a game")
     @Conditions("lobby")
     fun Player.joinArena() = joinArena(null)
 
+    @ExperimentalStdlibApi
     @Subcommand("arena joins")
     @Description("join a specific game")
     @CommandPermission(PERM_ADMIN)
@@ -114,17 +117,17 @@ object Command : BaseCommand() {
                 // filter by name if necessary
                 if (name != null) filter { it.name == name }
                 else this
-            }.run {
-                // find non-full game with the most players
-                filter { it.isJoinable }
-                    .shuffled()
-                    .maxBy { it.numAlivePlayers }
-                    ?: run {
-                        // or create a new one if theyre all full
-                        if (name != null) ArenaGame(name)
-                        else ArenaGame()
-                    }
-            }.run {
+            }
+            .filter { it.isJoinable }
+            .run {
+                val max = maxBy { it.numAlivePlayers }
+                filter { it == max }.elementAtOrElse(Random.nextInt(size)) {
+                    // or create a new one if theyre all full
+                    if (name != null) ArenaGame(name)
+                    else ArenaGame()
+                }
+            }
+            .run {
                 // join the game
                 info("joining game")
                 teleport(world.spawnLocation, COMMAND)
