@@ -15,20 +15,20 @@ import hazae41.minecraft.kutils.bukkit.server
 import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import java.util.*
 
 /**
  * checks if [Entity] is in a game world
  */
-val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
+inline val Entity.inGame get() = world.name.endsWith(GAME_WORLD_SUFFIX)
 
 /**
  * return [ArenaGame] that [Entity] is in
  */
 val Entity.gameIn
-    get() = if (!inGame) null
-    else games.find { it.world == world }
-        ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
+    get() =
+        if (!inGame) null
+        else games.find { it.world == world }
+            ?: error("entity $this is in game world ${world.name} with no associated ArenaGame")
 
 const val MAP_WORLD_SUFFIX = "_gg_map"
 const val GAME_WORLD_SUFFIX = "_gg_game"
@@ -44,7 +44,6 @@ typealias ArenaMap = Pair<String, World>
 
 inline val ArenaMap.name get() = first
 inline val ArenaMap.world get() = second
-
 
 
 fun ArenaGame.broadcast(message: String) = world.players.forEach { it.info(message) }
@@ -69,7 +68,7 @@ class ArenaGame(val name: String = maps.keys.random()) {
         games.add(this)
     }
 
-    val world = WorldHelper.getWorld(worldName)
+    val world = WorldHelper[worldName]
 
     private val startHandler = StartHandler(this)
 
@@ -98,7 +97,6 @@ class ArenaGame(val name: String = maps.keys.random()) {
             isCooldown = true
             initAndSpawn()
         }
-        // todo put players somewhere else instead of just leaving them in the map before the game starts??
     }
 
     /**
@@ -110,10 +108,4 @@ class ArenaGame(val name: String = maps.keys.random()) {
         // close game if only one player left
         if (numAlivePlayers <= 1) close()
     }
-
-    override fun equals(other: Any?) = (other as? ArenaGame)?.let {
-        it.name == name && it.id == id
-    } ?: false
-
-    override fun hashCode() = Objects.hash(name, id)
 }

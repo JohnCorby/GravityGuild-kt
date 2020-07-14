@@ -4,7 +4,7 @@ import com.johncorby.coreapi.commandError
 import com.johncorby.coreapi.commandRequire
 import com.johncorby.coreapi.time
 import com.johncorby.coreapi.warn
-import com.johncorby.gravityguild.Command
+import com.johncorby.gravityguild.Command.lobby
 import hazae41.minecraft.kutils.bukkit.server
 import hazae41.minecraft.kutils.get
 import org.bukkit.World
@@ -25,10 +25,10 @@ object WorldHelper {
                 x: Int,
                 z: Int,
                 biome: BiomeGrid
-            ): ChunkData = createChunkData(world)
+            ) = createChunkData(world)
         })
 
-    fun getWorld(name: String) = server.getWorld(name) ?: commandError("world $name doesnt exist")
+    operator fun get(name: String) = server.getWorld(name) ?: commandError("world $name doesnt exist")
 
     /**
      * creates a world [name], or loads it if it already exists
@@ -36,7 +36,7 @@ object WorldHelper {
     fun createOrLoad(name: String): World {
         lateinit var world: World
         time("world $name create/load") {
-            commandRequire(name.matches("""[a-z0-9/._-]+""".toRegex())) { "world name $name has invalid character" }
+            commandRequire(name.matches("""[a-z0-9/._-]+""".toRegex()), "world name $name has invalid character")
             world = WorldCreator(name).copy(creator).createWorld()
                 ?: error("creation of world $name failed")
         }
@@ -48,8 +48,8 @@ object WorldHelper {
      */
     fun delete(name: String) {
         time("world $name delete") {
-            getWorld(name).apply {
-                players.forEach { Command.lobby(it) }
+            get(name).apply {
+                players.forEach { it.lobby() }
 
                 server.unloadWorld(this, false)
                 worldFolder.deleteRecursively()
@@ -63,7 +63,7 @@ object WorldHelper {
     fun copy(from: String, to: String): World {
         lateinit var world: World
         time("world copy from $from to $to") {
-            val fromWorld = getWorld(from)
+            val fromWorld = get(from)
             fromWorld.save()
 
             val fromWorldFolder = fromWorld.worldFolder

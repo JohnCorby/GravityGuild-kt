@@ -4,6 +4,7 @@ import com.johncorby.coreapi.Plugin
 import com.johncorby.coreapi.info
 import com.johncorby.gravityguild.arena.*
 
+@Suppress("unused")
 class Main : Plugin() {
     override fun onEnable() {
         super.onEnable()

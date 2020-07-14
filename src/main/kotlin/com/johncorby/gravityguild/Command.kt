@@ -23,7 +23,7 @@ object Command : BaseCommand() {
             enableUnstableAPI("help")
 
             // arena
-            commandCompletions.registerCompletion("arenaMaps") { maps.search(it) }
+            commandCompletions.registerCompletion("arenaMaps") { maps.keys.search(it) }
             commandContexts.registerContext(Pair::class.java) {
                 val name: String = it.popFirstArg()
                 name to (maps[name] ?: commandError("arena $name doesnt exist"))
@@ -43,7 +43,7 @@ object Command : BaseCommand() {
             }
 
             definePermissions(
-                Permission(PERM_ADMIN, "you can do everything"),
+                Permission(PERM_ADMIN, "you can do everything", PermissionDefault.OP),
                 Permission(PERM_DEFAULT, "you can do normal things", PermissionDefault.TRUE)
             )
 
@@ -138,7 +138,7 @@ object Command : BaseCommand() {
         commandRequire(!inGame, "you are not in a game")
 
         info("leaving game")
-        lobby(this)
+        lobby()
     }
 
 
@@ -153,8 +153,8 @@ object Command : BaseCommand() {
     @Subcommand("lobby")
     @Description("teleport to lobby")
     @Conditions("lobby")
-    fun lobby(sender: Player) {
-        sender.info("teleporting to lobby")
-        sender.teleport(Data.lobby!!, COMMAND)
+    fun Player.lobby() {
+        info("teleporting to lobby")
+        teleport(Data.lobby!!, COMMAND)
     }
 }

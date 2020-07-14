@@ -60,7 +60,13 @@ object GameListener : Listener {
 
         listen<PlayerInteractEvent> {
             if (!player.inGame) return@listen
-            if (action !in arrayOf(Action.LEFT_CLICK_BLOCK, Action.LEFT_CLICK_AIR)) return@listen
+            if (action !in arrayOf(
+                    Action.LEFT_CLICK_BLOCK,
+                    Action.LEFT_CLICK_AIR,
+                    Action.RIGHT_CLICK_BLOCK,
+                    Action.RIGHT_CLICK_AIR
+                )
+            ) return@listen
 
             // shoot skull
             player.launchProjectile(WitherSkull::class.java, player.eyeLocation.direction)
